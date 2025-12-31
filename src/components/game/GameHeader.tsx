@@ -33,7 +33,7 @@ export function GameHeader({ goldenSplinters, splinterMultiplier, onDevMenuTrigg
         >
           Bee-Kay Academy
         </h1>
-        <p className="text-sm text-muted-foreground">Operation Wooden Park</p>
+        <p className="text-sm text-muted-foreground">Wooden Park Revival</p>
       </div>
 
       <div className="flex items-center gap-4">
