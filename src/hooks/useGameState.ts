@@ -12,6 +12,7 @@ export interface GameState {
   lastSaveTimestamp: number;
   antagonistPaused: boolean;
   antagonistPausedUntil: number;
+  hasSeenVictory: boolean;
 }
 
 const INITIAL_STATE: GameState = {
@@ -25,6 +26,7 @@ const INITIAL_STATE: GameState = {
   lastSaveTimestamp: Date.now(),
   antagonistPaused: false,
   antagonistPausedUntil: 0,
+  hasSeenVictory: false,
 };
 
 const STORAGE_KEY = 'bk-academy-save';
@@ -46,6 +48,11 @@ export function useGameState() {
   const stateRef = useRef(state);
   stateRef.current = state;
 
+  // Determine victory screen
+  const markVictorySeen = () => {
+    setState(prev => ({ ...prev, hasSeenVictory: true }));
+  };
+  
   // Calculate passive income per second
   const getPassiveIncome = useCallback(() => {
     let baseIncome = 0;
@@ -307,5 +314,6 @@ export function useGameState() {
     addPapers,
     addSplinters,
     wipeSave,
+    markVictorySeen,
   };
 }
