@@ -34,13 +34,15 @@ export default function Index() {
   const [showDevMenu, setShowDevMenu] = useState(false);
   const [antagonist, setAntagonist] = useState<'soggy' | 'sentinel' | null>(null);
   const [showVictory, setShowVictory] = useState(false);
+  const [victoryDismissed, setVictoryDismissed] = useState(false);
 
   // Check for victory condition
   useEffect(() => {
-    if (state.unlockedBlueprints.includes('statue') && !showVictory) {
+    // Only show if statue is unlocked AND victory hasn't been shown/dismissed yet
+    if (state.unlockedBlueprints.includes('statue') && !showVictory && !victoryDismissed) {
       setShowVictory(true);
     }
-  }, [state.unlockedBlueprints, showVictory]);
+  }, [state.unlockedBlueprints, showVictory, victoryDismissed]);
 
   // Random antagonist spawns
   useEffect(() => {
@@ -155,7 +157,12 @@ export default function Index() {
       )}
 
       {showVictory && (
-        <VictoryScreen onClose={() => setShowVictory(false)} />
+        <VictoryScreen 
+          onClose={() => {
+            setShowVictory(false);
+            setVictoryDismissed(true); // This prevents the useEffect from re-triggering
+          }} 
+        />
       )}
     </div>
   );
