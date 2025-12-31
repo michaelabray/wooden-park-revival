@@ -29,6 +29,7 @@ export default function Index() {
     addPapers,
     addSplinters,
     wipeSave,
+    markVictorySeen, 
   } = useGameState();
 
   const [showDevMenu, setShowDevMenu] = useState(false);
@@ -38,11 +39,11 @@ export default function Index() {
 
   // Check for victory condition
   useEffect(() => {
-    // Only show if statue is unlocked AND victory hasn't been shown/dismissed yet
-    if (state.unlockedBlueprints.includes('statue') && !showVictory && !victoryDismissed) {
+    // We check state.hasSeenVictory which comes from your localStorage/DB
+    if (state.unlockedBlueprints.includes('statue') && !state.hasSeenVictory && !showVictory) {
       setShowVictory(true);
     }
-  }, [state.unlockedBlueprints, showVictory, victoryDismissed]);
+  }, [state.unlockedBlueprints, state.hasSeenVictory, showVictory]);
 
   // Random antagonist spawns
   useEffect(() => {
@@ -160,7 +161,7 @@ export default function Index() {
         <VictoryScreen 
           onClose={() => {
             setShowVictory(false);
-            setVictoryDismissed(true); // This prevents the useEffect from re-triggering
+            markVictorySeen(); // <--- This saves the "seen" status permanently
           }} 
         />
       )}
