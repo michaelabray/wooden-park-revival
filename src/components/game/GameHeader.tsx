@@ -40,7 +40,7 @@ export function GameHeader({
         className="cursor-default select-none flex items-center gap-3"
       >
         <img 
-          src="/assets/ui/game-logo-header.webp" 
+          src="assets/ui/game-logo-header.webp" 
           alt="Bee-Kay Academy"
           className="h-12 md:h-16 object-contain"
         />
@@ -52,7 +52,7 @@ export function GameHeader({
         {goldenSplinters > 0 && (
           <div className="flex items-center gap-2 bg-gold/10 px-3 py-1.5 rounded-full border border-gold/30">
             <img 
-              src="/assets/icons/splinter.webp" 
+              src="assets/icons/splinter.webp" 
               alt="Splinters"
               className="w-5 h-5 object-contain"
             />
@@ -69,7 +69,7 @@ export function GameHeader({
           title="Shop"
         >
           <img 
-            src="/assets/ui/cart.webp" 
+            src="assets/ui/cart.webp" 
             alt="Shop"
             className="w-8 h-8 object-contain"
           />
@@ -81,7 +81,7 @@ export function GameHeader({
           title="Trophies"
         >
           <img 
-            src="/assets/ui/trophy.webp" 
+            src="assets/ui/trophy.webp" 
             alt="Trophies"
             className="w-8 h-8 object-contain"
           />
@@ -93,7 +93,7 @@ export function GameHeader({
           title="Settings"
         >
           <img 
-            src="/assets/ui/cog.webp" 
+            src="assets/ui/cog.webp" 
             alt="Settings"
             className="w-8 h-8 object-contain"
           />
