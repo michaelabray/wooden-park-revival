@@ -20,7 +20,7 @@ export function VictoryScreen({ onClose }: VictoryScreenProps) {
         <div 
           className="relative rounded-xl overflow-hidden"
           style={{
-            backgroundImage: `url('/assets/ui/victory-popup.webp')`,
+            backgroundImage: `url('assets/ui/victory-popup.webp')`,
             backgroundSize: 'cover',
             backgroundPosition: 'center',
           }}
@@ -28,7 +28,7 @@ export function VictoryScreen({ onClose }: VictoryScreenProps) {
           <div className="bg-background/80 p-8 text-center backdrop-blur-sm">
             {/* Founder statue image */}
             <img 
-              src="/assets/blueprints/founder.webp"
+              src="assets/blueprints/founder.webp"
               alt="Founder Statue"
               className="w-32 h-32 object-contain mx-auto mb-6 animate-pulse-glow"
             />
@@ -57,7 +57,7 @@ export function VictoryScreen({ onClose }: VictoryScreenProps) {
               className="relative overflow-hidden px-8 py-3 rounded-lg transition-transform hover:scale-105 active:scale-95"
             >
               <img 
-                src="/assets/ui/button.webp" 
+                src="assets/ui/button.webp" 
                 alt=""
                 className="absolute inset-0 w-full h-full object-cover"
               />
