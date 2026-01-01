@@ -14,7 +14,7 @@ export function BlueprintShop({ goldenSplinters, unlockedBlueprints, onBuy }: Bl
         <h3 className="font-display text-2xl text-gold">The Blueprint</h3>
         <div className="flex items-center gap-2">
           <img 
-            src="assets/icons/splinter.webp" 
+            src="/wooden-park-revival/assets/icons/splinter.webp" 
             alt="Splinters"
             className="w-5 h-5 object-contain"
           />
@@ -65,7 +65,7 @@ export function BlueprintShop({ goldenSplinters, unlockedBlueprints, onBuy }: Bl
               {!isUnlocked && (
                 <div className="flex items-center gap-1">
                   <img 
-                    src="assets/icons/splinter.webp" 
+                    src="/wooden-park-revival/assets/icons/splinter.webp" 
                     alt=""
                     className="w-4 h-4 object-contain"
                   />

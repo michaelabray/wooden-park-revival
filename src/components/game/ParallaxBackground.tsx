@@ -15,11 +15,11 @@ const BLUEPRINT_POSITIONS: Record<string, { x: string; y: string; scale: number 
 };
 
 const BLUEPRINT_IMAGES: Record<string, string> = {
-  steps: 'assets/blueprints/steps.webp',
-  slide: 'assets/blueprints/slide.webp',
-  swing: 'assets/blueprints/swings.webp',
-  walls: 'assets/blueprints/wall.webp',
-  statue: 'assets/blueprints/founder.webp',
+  steps: '/wooden-park-revival/assets/blueprints/steps.webp',
+  slide: '/wooden-park-revival/assets/blueprints/slide.webp',
+  swing: '/wooden-park-revival/assets/blueprints/swings.webp',
+  walls: '/wooden-park-revival/assets/blueprints/wall.webp',
+  statue: '/wooden-park-revival/assets/blueprints/founder.webp',
 };
 
 export function ParallaxBackground({ unlockedBlueprints }: ParallaxBackgroundProps) {
@@ -50,7 +50,7 @@ export function ParallaxBackground({ unlockedBlueprints }: ParallaxBackgroundPro
       <div
         className="absolute inset-0 bg-repeat-x"
         style={{
-          backgroundImage: `url('assets/bg/bg-sky.webp')`,
+          backgroundImage: `url('/wooden-park-revival/assets/bg/bg-sky.webp')`,
           backgroundSize: 'cover',
           backgroundPosition: `${skyOffset}px 0`,
           transform: 'scale(1.1)',
@@ -61,7 +61,7 @@ export function ParallaxBackground({ unlockedBlueprints }: ParallaxBackgroundPro
       <div
         className="absolute inset-0 bg-no-repeat bg-center bg-cover"
         style={{
-          backgroundImage: `url('assets/bg/bg-world.webp')`,
+          backgroundImage: `url('/wooden-park-revival/assets/bg/bg-world.webp')`,
           top: '10%',
         }}
       />

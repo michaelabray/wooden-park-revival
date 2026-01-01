@@ -30,7 +30,7 @@ export function SplashScreen({ onComplete }: SplashScreenProps) {
       }`}
     >
       <img 
-        src="assets/ui/splash-screen.webp" 
+        src="/wooden-park-revival/assets/ui/splash-screen.webp" 
         alt="Bee-Kay Academy"
         className="max-w-full max-h-full object-contain"
       />

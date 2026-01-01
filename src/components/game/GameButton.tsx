@@ -25,7 +25,7 @@ export function GameButton({
     >
       {/* Button background image */}
       <img 
-        src="assets/ui/button.webp" 
+        src="/wooden-park-revival/assets/ui/button.webp" 
         alt=""
         className="absolute inset-0 w-full h-full object-cover"
         style={{ filter: disabled ? 'grayscale(50%)' : 'none' }}
