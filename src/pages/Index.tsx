@@ -92,8 +92,13 @@ export default function Index() {
   const clickPower = getClickPower();
   const splinterMultiplier = getSplinterMultiplier(state.goldenSplinters);
 
+  // Stable callback to prevent the splash screen from resetting every second
+  const handleSplashComplete = useCallback(() => {
+    setShowSplash(false);
+  }, []);
+  
   if (showSplash) {
-    return <SplashScreen onComplete={() => setShowSplash(false)} />;
+    return <SplashScreen onComplete={handleSplashComplete} />;
   }
 
   return (
