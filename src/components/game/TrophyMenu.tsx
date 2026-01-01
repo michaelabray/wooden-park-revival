@@ -74,26 +74,27 @@ export function TrophyMenu({
   const completedCount = milestones.filter(m => m.isComplete).length;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm" onClick={onClose}>
       <div 
-        className="relative max-w-md w-full mx-4 animate-bounce-in"
+        className="relative max-w-md w-full mx-4 animate-bounce-in rounded-xl overflow-hidden"
+        onClick={e => e.stopPropagation()}
         style={{
-          backgroundImage: `url('/wooden-park-revival/assets/ui/panel-bg.webp')`,
+          backgroundImage: `url('./assets/ui/panel-bg.webp')`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
         }}
       >
-        <div className="bg-background/90 rounded-xl p-6 border border-gold/30">
+        <div className="p-6">
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 p-2 rounded-full bg-secondary hover:bg-secondary/80 transition-colors"
+            className="absolute top-4 right-4 p-2 rounded-full bg-secondary/80 hover:bg-secondary transition-colors"
           >
             <X className="w-5 h-5 text-foreground" />
           </button>
 
           <div className="flex items-center gap-3 mb-6">
             <img 
-              src="/wooden-park-revival/assets/ui/trophy.webp" 
+              src="./assets/ui/trophy.webp" 
               alt="Trophy" 
               className="w-12 h-12 object-contain"
             />
@@ -107,18 +108,18 @@ export function TrophyMenu({
 
           {/* Stats Summary */}
           <div className="grid grid-cols-2 gap-3 mb-6">
-            <div className="bg-secondary/50 rounded-lg p-3 text-center">
+            <div className="bg-background/50 rounded-lg p-3 text-center">
               <p className="text-xs text-muted-foreground">Total Splinters</p>
               <p className="text-lg font-display text-gold">{formatPapers(totalSplintersEarned)}</p>
             </div>
-            <div className="bg-secondary/50 rounded-lg p-3 text-center">
+            <div className="bg-background/50 rounded-lg p-3 text-center">
               <p className="text-xs text-muted-foreground">Antagonists Defeated</p>
               <p className="text-lg font-display text-accent">{antagonistsDefeated}</p>
             </div>
           </div>
 
           {/* Founder Statue Progress Bar */}
-          <div className="bg-secondary/30 rounded-lg p-4 mb-4 border border-gold/20">
+          <div className="bg-background/30 rounded-lg p-4 mb-4">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium text-foreground">Founder Statue Progress</span>
               <span className="text-sm text-gold">{unlockedBlueprints.length}/5</span>
@@ -139,14 +140,14 @@ export function TrophyMenu({
             {milestones.map(milestone => (
               <div
                 key={milestone.id}
-                className={`flex items-center gap-3 p-3 rounded-lg border transition-all ${
+                className={`flex items-center gap-3 p-3 rounded-lg transition-all ${
                   milestone.isComplete
-                    ? 'bg-success/10 border-success/30'
-                    : 'bg-secondary/30 border-border'
+                    ? 'bg-success/20'
+                    : 'bg-background/30'
                 }`}
               >
                 <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                  milestone.isComplete ? 'bg-success/20 text-success' : 'bg-muted text-muted-foreground'
+                  milestone.isComplete ? 'bg-success/30 text-success' : 'bg-muted text-muted-foreground'
                 }`}>
                   {milestone.isComplete ? <Check className="w-5 h-5" /> : milestone.icon}
                 </div>

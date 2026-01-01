@@ -1,5 +1,5 @@
 import { BLUEPRINTS } from '@/lib/gameUtils';
-import { Check, Lock } from 'lucide-react';
+import { Check } from 'lucide-react';
 
 interface BlueprintShopProps {
   goldenSplinters: number;
@@ -9,23 +9,20 @@ interface BlueprintShopProps {
 
 export function BlueprintShop({ goldenSplinters, unlockedBlueprints, onBuy }: BlueprintShopProps) {
   return (
-    <div className="bento-card-gold">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="font-display text-2xl text-gold">The Blueprint</h3>
-        <div className="flex items-center gap-2">
+    <div>
+      <div className="flex items-center justify-between mb-3">
+        <h3 className="font-display text-xl text-gold">The Blueprint</h3>
+        <div className="flex items-center gap-2 bg-gold/10 px-3 py-1 rounded-full">
           <img 
-            src="/wooden-park-revival/assets/icons/splinter.webp" 
+            src="./assets/icons/splinter.webp" 
             alt="Splinters"
-            className="w-5 h-5 object-contain"
+            className="w-4 h-4 object-contain"
           />
           <span className="text-sm font-medium text-gold">{goldenSplinters}</span>
         </div>
       </div>
-      <p className="text-xs text-muted-foreground mb-4">
-        Rebuild the Wooden Park piece by piece
-      </p>
 
-      <div className="grid grid-cols-1 gap-3">
+      <div className="space-y-2">
         {BLUEPRINTS.map(piece => {
           const isUnlocked = unlockedBlueprints.includes(piece.id);
           const canAfford = goldenSplinters >= piece.cost;
@@ -35,29 +32,29 @@ export function BlueprintShop({ goldenSplinters, unlockedBlueprints, onBuy }: Bl
               key={piece.id}
               onClick={() => !isUnlocked && onBuy(piece.id, piece.cost)}
               disabled={isUnlocked || !canAfford}
-              className={`flex items-center gap-3 p-3 rounded-lg border transition-all ${
+              className={`w-full flex items-center gap-3 p-2 rounded-lg transition-all ${
                 isUnlocked
-                  ? 'bg-success/10 border-success/30'
+                  ? 'bg-success/20'
                   : canAfford
-                  ? 'bg-secondary/50 border-gold/30 hover:border-gold/60 hover:scale-[1.02]'
-                  : 'bg-secondary/30 border-border opacity-60'
+                  ? 'bg-gold/10 hover:bg-gold/20 hover:scale-[1.02]'
+                  : 'bg-secondary/30 opacity-60'
               }`}
             >
-              <div className={`w-12 h-12 rounded-lg flex items-center justify-center overflow-hidden ${
-                isUnlocked ? 'bg-success/20' : 'bg-gold/10'
+              <div className={`w-10 h-10 rounded-lg flex items-center justify-center overflow-hidden ${
+                isUnlocked ? 'bg-success/30' : 'bg-background/30'
               }`}>
                 {isUnlocked ? (
-                  <Check className="w-6 h-6 text-success" />
+                  <Check className="w-5 h-5 text-success" />
                 ) : (
                   <img 
                     src={piece.image} 
                     alt={piece.name}
-                    className="w-10 h-10 object-contain"
+                    className="w-8 h-8 object-contain"
                   />
                 )}
               </div>
               <div className="flex-1 text-left">
-                <h4 className={`font-semibold ${isUnlocked ? 'text-success' : 'text-foreground'}`}>
+                <h4 className={`font-semibold text-sm ${isUnlocked ? 'text-success' : 'text-foreground'}`}>
                   {piece.name}
                 </h4>
                 <p className="text-xs text-muted-foreground">{piece.effect}</p>
@@ -65,7 +62,7 @@ export function BlueprintShop({ goldenSplinters, unlockedBlueprints, onBuy }: Bl
               {!isUnlocked && (
                 <div className="flex items-center gap-1">
                   <img 
-                    src="/wooden-park-revival/assets/icons/splinter.webp" 
+                    src="./assets/icons/splinter.webp" 
                     alt=""
                     className="w-4 h-4 object-contain"
                   />

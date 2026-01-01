@@ -5,13 +5,13 @@ interface ParallaxBackgroundProps {
   unlockedBlueprints: string[];
 }
 
-// Blueprint positions on the world background
+// Blueprint positions - organized in a row at the bottom of the screen
 const BLUEPRINT_POSITIONS: Record<string, { x: string; y: string; scale: number }> = {
-  steps: { x: '15%', y: '65%', scale: 0.8 },
-  slide: { x: '35%', y: '55%', scale: 0.9 },
-  swing: { x: '60%', y: '60%', scale: 0.85 },
-  walls: { x: '80%', y: '58%', scale: 0.75 },
-  statue: { x: '50%', y: '45%', scale: 1.1 },
+  steps: { x: '10%', y: '78%', scale: 0.7 },
+  slide: { x: '30%', y: '76%', scale: 0.75 },
+  swing: { x: '50%', y: '77%', scale: 0.7 },
+  walls: { x: '70%', y: '78%', scale: 0.65 },
+  statue: { x: '90%', y: '75%', scale: 0.8 },
 };
 
 const BLUEPRINT_IMAGES: Record<string, string> = {
@@ -46,14 +46,14 @@ export function ParallaxBackground({ unlockedBlueprints }: ParallaxBackgroundPro
 
   return (
     <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
-      {/* Sky layer - moves slowly */}
+      {/* Sky layer - moves slowly with smooth parallax */}
       <div
-        className="absolute inset-0 bg-repeat-x"
+        className="absolute inset-0"
         style={{
           backgroundImage: `url('/wooden-park-revival/assets/bg/bg-sky.webp')`,
-          backgroundSize: 'cover',
-          backgroundPosition: `${skyOffset}px 0`,
-          transform: 'scale(1.1)',
+          backgroundSize: '200% 100%',
+          backgroundPosition: `${skyOffset % 100}% 0`,
+          backgroundRepeat: 'repeat-x',
         }}
       />
 
