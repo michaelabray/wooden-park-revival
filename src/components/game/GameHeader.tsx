@@ -42,7 +42,7 @@ export function GameHeader({
         <img 
           src="/wooden-park-revival/assets/ui/game-logo-header.webp" 
           alt="Bee-Kay Academy"
-          className="h-12 md:h-16 object-contain"
+          className="h-20 md:h-28 lg:h-32 object-contain"
         />
       </div>
 

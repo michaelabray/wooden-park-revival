@@ -48,35 +48,37 @@ export function PaperClicker({ currentPapers, passiveIncome, clickPower, onClick
   }, [onClick]);
 
   return (
-    <div className="bento-card-accent flex flex-col items-center justify-center p-6 relative">
+    <div className="flex flex-col items-center justify-center p-6 relative">
       {/* Paper Counter with icon */}
-      <div className="flex items-center gap-3 mb-6">
+      <div className="flex items-center gap-4 mb-8">
         <img 
-          src="/wooden-park-revival/assets/icons/paper.webp" 
+          src="./assets/icons/paper.webp" 
           alt="Papers" 
-          className="w-10 h-10 object-contain"
+          className="w-14 h-14 object-contain drop-shadow-lg"
         />
         <div className="text-center">
-          <h2 className="text-4xl md:text-5xl font-display text-gold animate-pulse-glow">
+          <h2 className="text-5xl md:text-6xl font-display text-gold drop-shadow-lg"
+            style={{ textShadow: '0 0 30px hsl(var(--gold) / 0.5)' }}
+          >
             {formatPapers(currentPapers)}
           </h2>
-          <p className="text-sm text-foreground/80">A+ Papers</p>
+          <p className="text-base text-foreground/80 font-medium">A+ Papers</p>
         </div>
       </div>
 
       {/* Pencil Click Button - The Hero */}
       <button
         onClick={handleClick}
-        className={`relative w-40 h-40 md:w-48 md:h-48 transition-transform duration-100 ${
+        className={`relative w-48 h-48 md:w-64 md:h-64 transition-transform duration-100 ${
           isClicking ? 'scale-90' : 'hover:scale-105'
         }`}
       >
         <img 
-          src="/wooden-park-revival/assets/hero/pencil.webp" 
+          src="./assets/hero/pencil.webp" 
           alt="Click to write papers"
           className="w-full h-full object-contain drop-shadow-2xl"
           style={{
-            filter: 'drop-shadow(0 0 20px hsl(var(--gold) / 0.5))',
+            filter: 'drop-shadow(0 0 30px hsl(var(--gold) / 0.6))',
           }}
         />
         
@@ -93,7 +95,7 @@ export function PaperClicker({ currentPapers, passiveIncome, clickPower, onClick
             } as React.CSSProperties}
           >
             <img 
-              src="/wooden-park-revival/assets/icons/click-plus-one.webp" 
+              src="./assets/icons/click-plus-one.webp" 
               alt="+1"
               className="w-12 h-12 object-contain"
             />
@@ -101,14 +103,16 @@ export function PaperClicker({ currentPapers, passiveIncome, clickPower, onClick
         ))}
       </button>
 
-      {/* Stats */}
-      <div className="mt-6 text-center space-y-1">
-        <p className="text-sm text-muted-foreground">
-          <span className="text-accent font-semibold">{formatPapers(clickPower)}</span> per click
-        </p>
-        <p className="text-sm text-muted-foreground">
-          <span className="text-gold font-semibold">{formatPapers(passiveIncome)}</span> per second
-        </p>
+      {/* Stats - Compact visual counters */}
+      <div className="mt-6 flex items-center gap-6">
+        <div className="flex items-center gap-2 bg-secondary/60 backdrop-blur-sm px-4 py-2 rounded-full border border-accent/30">
+          <span className="text-accent font-display text-lg">{formatPapers(clickPower)}</span>
+          <span className="text-foreground/70 text-sm">/click</span>
+        </div>
+        <div className="flex items-center gap-2 bg-secondary/60 backdrop-blur-sm px-4 py-2 rounded-full border border-gold/30">
+          <span className="text-gold font-display text-lg">{formatPapers(passiveIncome)}</span>
+          <span className="text-foreground/70 text-sm">/sec</span>
+        </div>
       </div>
     </div>
   );

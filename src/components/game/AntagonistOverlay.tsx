@@ -10,7 +10,7 @@ interface AntagonistOverlayProps {
 }
 
 export function AntagonistOverlay({ type, onSuccess, onFailure }: AntagonistOverlayProps) {
-  const [timeLeft, setTimeLeft] = useState(type === 'soggy' ? 5 : 3);
+  const [timeLeft, setTimeLeft] = useState(type === 'soggy' ? 8 : 5);
   const [isDismissing, setIsDismissing] = useState(false);
 
   useEffect(() => {

@@ -45,6 +45,7 @@ export default function Index() {
   const [showSettings, setShowSettings] = useState(false);
   const [antagonist, setAntagonist] = useState<'soggy' | 'sentinel' | null>(null);
   const [showVictory, setShowVictory] = useState(false);
+  const [showShop, setShowShop] = useState(false);
   const [lastAntagonistTime, setLastAntagonistTime] = useState(Date.now());
 
   // Check for victory condition
@@ -106,24 +107,28 @@ export default function Index() {
       {/* Parallax Background */}
       <ParallaxBackground unlockedBlueprints={state.unlockedBlueprints} />
 
-      <div className="relative z-10 container max-w-6xl mx-auto px-4">
+      <div className="relative z-10 container max-w-4xl mx-auto px-4">
         <GameHeader
           goldenSplinters={state.goldenSplinters}
           splinterMultiplier={splinterMultiplier}
           onDevMenuTrigger={() => setShowDevMenu(true)}
           onSettingsClick={() => setShowSettings(true)}
           onTrophyClick={() => setShowTrophyMenu(true)}
-          onShopClick={() => {}}
+          onShopClick={() => setShowShop(true)}
         />
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 mt-4">
-          <div className="lg:col-span-4 space-y-4">
-            <PaperClicker
-              currentPapers={state.currentPapers}
-              passiveIncome={passiveIncome}
-              clickPower={clickPower}
-              onClick={handleClick}
-            />
+        {/* Main Game Area - Visual focused layout */}
+        <div className="flex flex-col items-center mt-4">
+          {/* Central Clicker */}
+          <PaperClicker
+            currentPapers={state.currentPapers}
+            passiveIncome={passiveIncome}
+            clickPower={clickPower}
+            onClick={handleClick}
+          />
+
+          {/* Fruit Snack Boost - Compact below clicker */}
+          <div className="mt-4 w-full max-w-xs">
             <FruitSnackBoost
               currentPapers={state.currentPapers}
               isActive={state.fruitSnackActive}
@@ -135,26 +140,51 @@ export default function Index() {
               onToggleAutoBoost={toggleAutoBoost}
             />
           </div>
-
-          <div className="lg:col-span-4">
-            <UnitShop currentPapers={state.currentPapers} units={state.units} onBuy={buyUnit} />
-          </div>
-
-          <div className="lg:col-span-4 space-y-4">
-            <GraduationPanel
-              currentPapers={state.currentPapers}
-              totalPapersLifetime={state.totalPapersLifetime}
-              currentSplinters={state.goldenSplinters}
-              onGraduate={graduate}
-            />
-            <BlueprintShop
-              goldenSplinters={state.goldenSplinters}
-              unlockedBlueprints={state.unlockedBlueprints}
-              onBuy={buyBlueprint}
-            />
-          </div>
         </div>
       </div>
+
+      {/* Shop Modal (replaces old grid layout for units/blueprints/graduation) */}
+      {showShop && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm" onClick={() => setShowShop(false)}>
+          <div 
+            className="relative max-w-2xl w-full mx-4 max-h-[80vh] overflow-y-auto animate-bounce-in rounded-xl"
+            onClick={e => e.stopPropagation()}
+            style={{
+              backgroundImage: `url('./assets/ui/panel-bg.webp')`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+            }}
+          >
+            <div className="p-6">
+              <button
+                onClick={() => setShowShop(false)}
+                className="absolute top-4 right-4 p-2 rounded-full bg-secondary/80 hover:bg-secondary transition-colors z-10"
+              >
+                <span className="text-foreground text-xl">×</span>
+              </button>
+
+              <h2 className="font-display text-3xl text-gold mb-6 text-center">Academy Shop</h2>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <UnitShop currentPapers={state.currentPapers} units={state.units} onBuy={buyUnit} />
+                <div className="space-y-4">
+                  <GraduationPanel
+                    currentPapers={state.currentPapers}
+                    totalPapersLifetime={state.totalPapersLifetime}
+                    currentSplinters={state.goldenSplinters}
+                    onGraduate={graduate}
+                  />
+                  <BlueprintShop
+                    goldenSplinters={state.goldenSplinters}
+                    unlockedBlueprints={state.unlockedBlueprints}
+                    onBuy={buyBlueprint}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <NewsTicker />
 
