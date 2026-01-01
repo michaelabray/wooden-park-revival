@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Bangers&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Patrick+Hand&display=swap');
 
 @layer base {
   :root {
@@ -80,12 +80,12 @@
 
   body {
     @apply bg-background text-foreground font-sans antialiased;
-    font-family: 'Space Grotesk', sans-serif;
+    font-family: 'Fredoka', sans-serif;
   }
 
   h1, h2, h3, .font-display {
-    font-family: 'Bangers', cursive;
-    letter-spacing: 0.05em;
+    font-family: 'Patrick Hand', cursive;
+    letter-spacing: 0.02em;
   }
 }
 
@@ -214,6 +214,17 @@
   100% {
     opacity: 0;
     transform: translateY(-60px) scale(1.2);
+  }
+}
+
+@keyframes float-up-jitter {
+  0% {
+    opacity: 1;
+    transform: translateY(0) translateX(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-80px) translateX(var(--jitter-x, 0)) scale(1.3);
   }
 }
 

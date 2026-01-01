@@ -1,10 +1,10 @@
-// Format large numbers for display
+// Format large numbers for display with 2 decimal precision
 export function formatPapers(num: number): string {
   if (num < 1000) return Math.floor(num).toString();
-  if (num < 1000000) return (Math.floor(num / 100) / 10).toFixed(1) + 'k';
-  if (num < 1000000000) return (Math.floor(num / 100000) / 10).toFixed(1) + 'M';
-  if (num < 1000000000000) return (Math.floor(num / 100000000) / 10).toFixed(1) + 'B';
-  return (Math.floor(num / 100000000000) / 10).toFixed(1) + 'T';
+  if (num < 1000000) return (Math.floor(num / 10) / 100).toFixed(2) + 'k';
+  if (num < 1000000000) return (Math.floor(num / 10000) / 100).toFixed(2) + 'M';
+  if (num < 1000000000000) return (Math.floor(num / 10000000) / 100).toFixed(2) + 'B';
+  return (Math.floor(num / 10000000000) / 100).toFixed(2) + 'T';
 }
 
 // Calculate exponential cost for units
@@ -22,7 +22,7 @@ export function getSplinterMultiplier(splinters: number): number {
   return 1 + (splinters * 0.05);
 }
 
-// Unit definitions
+// Unit definitions with 15% buff to Daydreamer and Overachiever
 export interface UnitType {
   id: string;
   name: string;
@@ -30,6 +30,7 @@ export interface UnitType {
   baseCost: number;
   baseYield: number;
   icon: string;
+  image: string;
 }
 
 export const UNITS: UnitType[] = [
@@ -38,16 +39,18 @@ export const UNITS: UnitType[] = [
     name: 'Daydreamer',
     description: 'Gazes out the window, occasionally scribbles notes',
     baseCost: 15,
-    baseYield: 0.05,
+    baseYield: 0.0575, // 0.05 * 1.15 = 0.0575 (15% buff)
     icon: 'Cloud',
+    image: './assets/units/daydreamer.webp',
   },
   {
     id: 'overachiever',
     name: 'Overachiever',
     description: 'Hand always raised, extra credit obsessed',
     baseCost: 100,
-    baseYield: 0.30,
+    baseYield: 0.345, // 0.30 * 1.15 = 0.345 (15% buff)
     icon: 'Star',
+    image: './assets/units/overachiever.webp',
   },
   {
     id: 'varsity-bobkat',
@@ -56,6 +59,7 @@ export const UNITS: UnitType[] = [
     baseCost: 500,
     baseYield: 1.80,
     icon: 'Trophy',
+    image: './assets/units/varsity-bobkat.webp',
   },
   {
     id: 'ai-whiz',
@@ -64,6 +68,7 @@ export const UNITS: UnitType[] = [
     baseCost: 2500,
     baseYield: 10.00,
     icon: 'Cpu',
+    image: './assets/units/ai-whiz.webp',
   },
   {
     id: 'rogue-graduate',
@@ -72,6 +77,7 @@ export const UNITS: UnitType[] = [
     baseCost: 10000,
     baseYield: 60.00,
     icon: 'GraduationCap',
+    image: './assets/units/rogue-graduate.webp',
   },
 ];
 
@@ -83,6 +89,7 @@ export interface BlueprintPiece {
   cost: number;
   effect: string;
   icon: string;
+  image: string;
 }
 
 export const BLUEPRINTS: BlueprintPiece[] = [
@@ -93,6 +100,7 @@ export const BLUEPRINTS: BlueprintPiece[] = [
     cost: 100,
     effect: '+20% Click Power',
     icon: 'Footprints',
+    image: './assets/blueprints/steps.webp',
   },
   {
     id: 'slide',
@@ -101,6 +109,7 @@ export const BLUEPRINTS: BlueprintPiece[] = [
     cost: 250,
     effect: '1.5x Passive Yield',
     icon: 'TrendingDown',
+    image: './assets/blueprints/slide.webp',
   },
   {
     id: 'swing',
@@ -109,6 +118,7 @@ export const BLUEPRINTS: BlueprintPiece[] = [
     cost: 500,
     effect: '-50% Antagonist Frequency',
     icon: 'Wind',
+    image: './assets/blueprints/swings.webp',
   },
   {
     id: 'walls',
@@ -117,6 +127,7 @@ export const BLUEPRINTS: BlueprintPiece[] = [
     cost: 1000,
     effect: '3x Paper Value',
     icon: 'Boxes',
+    image: './assets/blueprints/wall.webp',
   },
   {
     id: 'statue',
@@ -125,6 +136,7 @@ export const BLUEPRINTS: BlueprintPiece[] = [
     cost: 2500,
     effect: 'Victory Achieved!',
     icon: 'Crown',
+    image: './assets/blueprints/founder.webp',
   },
 ];
 
@@ -139,3 +151,15 @@ export const NEWS_MESSAGES = [
   "Warning: The Mystery Meatloaf has achieved sentience. Do not make eye contact.",
   "The Wooden Park pieces are scattered... find them all.",
 ];
+
+// Antagonist dialogue - short and punchy
+export const ANTAGONIST_DIALOGUE = {
+  soggy: {
+    title: 'CHEF SOGGY!',
+    line: "Mystery meatloaf incoming! Study or starve!",
+  },
+  sentinel: {
+    title: 'SAFETY SENTINEL!',
+    line: "Papers detected! Hide the evidence!",
+  },
+};

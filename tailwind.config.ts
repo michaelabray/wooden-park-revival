@@ -14,8 +14,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ['Space Grotesk', 'sans-serif'],
-        display: ['Bangers', 'cursive'],
+        sans: ['Fredoka', 'sans-serif'],
+        display: ['Patrick Hand', 'cursive'],
       },
       colors: {
         border: "hsl(var(--border))",

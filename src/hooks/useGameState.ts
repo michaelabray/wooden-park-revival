@@ -5,6 +5,7 @@ export interface GameState {
   currentPapers: number;
   totalPapersLifetime: number;
   goldenSplinters: number;
+  totalSplintersEarned: number;
   unlockedBlueprints: string[];
   units: Record<string, number>;
   fruitSnackActive: boolean;
@@ -13,12 +14,16 @@ export interface GameState {
   antagonistPaused: boolean;
   antagonistPausedUntil: number;
   hasSeenVictory: boolean;
+  antagonistsDefeated: number;
+  autoBoostEnabled: boolean;
+  autoBoostPurchased: boolean;
 }
 
 const INITIAL_STATE: GameState = {
   currentPapers: 0,
   totalPapersLifetime: 0,
   goldenSplinters: 0,
+  totalSplintersEarned: 0,
   unlockedBlueprints: [],
   units: {},
   fruitSnackActive: false,
@@ -27,16 +32,30 @@ const INITIAL_STATE: GameState = {
   antagonistPaused: false,
   antagonistPausedUntil: 0,
   hasSeenVictory: false,
+  antagonistsDefeated: 0,
+  autoBoostEnabled: false,
+  autoBoostPurchased: false,
 };
 
 const STORAGE_KEY = 'bk-academy-save';
+const FRUIT_SNACK_COST = 50;
+const AUTO_BOOST_COST = 5000;
 
 export function useGameState() {
   const [state, setState] = useState<GameState>(() => {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
       try {
-        return JSON.parse(saved);
+        const parsed = JSON.parse(saved);
+        // Migrate old saves
+        return {
+          ...INITIAL_STATE,
+          ...parsed,
+          totalSplintersEarned: parsed.totalSplintersEarned || parsed.goldenSplinters || 0,
+          antagonistsDefeated: parsed.antagonistsDefeated || 0,
+          autoBoostEnabled: parsed.autoBoostEnabled || false,
+          autoBoostPurchased: parsed.autoBoostPurchased || false,
+        };
       } catch {
         return INITIAL_STATE;
       }
@@ -52,6 +71,14 @@ export function useGameState() {
   const markVictorySeen = () => {
     setState(prev => ({ ...prev, hasSeenVictory: true }));
   };
+
+  // Increment antagonists defeated
+  const incrementAntagonistsDefeated = useCallback(() => {
+    setState(prev => ({
+      ...prev,
+      antagonistsDefeated: prev.antagonistsDefeated + 1,
+    }));
+  }, []);
   
   // Calculate passive income per second
   const getPassiveIncome = useCallback(() => {
@@ -151,6 +178,17 @@ export function useGameState() {
         // Check fruit snack expiry
         const fruitSnackActive = prev.fruitSnackActive && now < prev.fruitSnackEndTime;
         
+        // Auto-boost logic: if enabled and not active, and can afford
+        let newPapers = prev.currentPapers;
+        let newFruitSnackActive = fruitSnackActive;
+        let newFruitSnackEndTime = prev.fruitSnackEndTime;
+
+        if (prev.autoBoostEnabled && prev.autoBoostPurchased && !fruitSnackActive && newPapers >= FRUIT_SNACK_COST) {
+          newPapers -= FRUIT_SNACK_COST;
+          newFruitSnackActive = true;
+          newFruitSnackEndTime = now + 30000;
+        }
+
         // Calculate passive income
         let baseIncome = 0;
         UNITS.forEach(unit => {
@@ -159,7 +197,7 @@ export function useGameState() {
         });
 
         const splinterMult = getSplinterMultiplier(prev.goldenSplinters);
-        const fruitSnackMult = fruitSnackActive ? 2 : 1;
+        const fruitSnackMult = newFruitSnackActive ? 2 : 1;
         const slideMult = prev.unlockedBlueprints.includes('slide') ? 1.5 : 1;
         const wallsMult = prev.unlockedBlueprints.includes('walls') ? 3 : 1;
         
@@ -170,9 +208,10 @@ export function useGameState() {
 
         return {
           ...prev,
-          currentPapers: prev.currentPapers + income,
+          currentPapers: newPapers + income,
           totalPapersLifetime: prev.totalPapersLifetime + income,
-          fruitSnackActive,
+          fruitSnackActive: newFruitSnackActive,
+          fruitSnackEndTime: newFruitSnackEndTime,
           antagonistPaused,
         };
       });
@@ -216,10 +255,10 @@ export function useGameState() {
 
   // Activate fruit snack
   const activateFruitSnack = useCallback(() => {
-    if (state.currentPapers >= 50) {
+    if (state.currentPapers >= FRUIT_SNACK_COST) {
       setState(prev => ({
         ...prev,
-        currentPapers: prev.currentPapers - 50,
+        currentPapers: prev.currentPapers - FRUIT_SNACK_COST,
         fruitSnackActive: true,
         fruitSnackEndTime: Date.now() + 30000,
       }));
@@ -227,6 +266,30 @@ export function useGameState() {
     }
     return false;
   }, [state.currentPapers]);
+
+  // Purchase auto-boost
+  const purchaseAutoBoost = useCallback(() => {
+    if (state.currentPapers >= AUTO_BOOST_COST && !state.autoBoostPurchased) {
+      setState(prev => ({
+        ...prev,
+        currentPapers: prev.currentPapers - AUTO_BOOST_COST,
+        autoBoostPurchased: true,
+        autoBoostEnabled: true,
+      }));
+      return true;
+    }
+    return false;
+  }, [state.currentPapers, state.autoBoostPurchased]);
+
+  // Toggle auto-boost
+  const toggleAutoBoost = useCallback(() => {
+    if (state.autoBoostPurchased) {
+      setState(prev => ({
+        ...prev,
+        autoBoostEnabled: !prev.autoBoostEnabled,
+      }));
+    }
+  }, [state.autoBoostPurchased]);
 
   // Buy blueprint
   const buyBlueprint = useCallback((blueprintId: string, cost: number) => {
@@ -245,13 +308,18 @@ export function useGameState() {
   const graduate = useCallback(() => {
     const newSplinters = calculateSplinters(state.totalPapersLifetime);
     if (newSplinters > state.goldenSplinters) {
+      const splinterGain = newSplinters - state.goldenSplinters;
       setState(prev => ({
         ...INITIAL_STATE,
         goldenSplinters: newSplinters,
+        totalSplintersEarned: prev.totalSplintersEarned + splinterGain,
         unlockedBlueprints: prev.unlockedBlueprints,
+        antagonistsDefeated: prev.antagonistsDefeated,
+        autoBoostPurchased: prev.autoBoostPurchased,
+        autoBoostEnabled: prev.autoBoostEnabled,
         lastSaveTimestamp: Date.now(),
       }));
-      return newSplinters - state.goldenSplinters;
+      return splinterGain;
     }
     return 0;
   }, [state.totalPapersLifetime, state.goldenSplinters]);
@@ -287,6 +355,7 @@ export function useGameState() {
     setState(prev => ({
       ...prev,
       goldenSplinters: prev.goldenSplinters + amount,
+      totalSplintersEarned: prev.totalSplintersEarned + amount,
     }));
   }, []);
 
@@ -308,9 +377,12 @@ export function useGameState() {
     handleClick,
     buyUnit,
     activateFruitSnack,
+    purchaseAutoBoost,
+    toggleAutoBoost,
     buyBlueprint,
     graduate,
     applyAntagonistPenalty,
+    incrementAntagonistsDefeated,
     addPapers,
     addSplinters,
     wipeSave,
