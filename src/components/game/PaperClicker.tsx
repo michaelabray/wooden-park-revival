@@ -50,19 +50,19 @@ export function PaperClicker({ currentPapers, passiveIncome, clickPower, onClick
   return (
     <div className="flex flex-col items-center justify-center p-6 relative">
       {/* Paper Counter with icon */}
-      <div className="flex items-center gap-4 mb-8">
+      <div className="flex items-center gap-6 mb-8">
         <img 
           src="./assets/icons/paper.webp" 
           alt="Papers" 
-          className="w-14 h-14 object-contain drop-shadow-lg"
+          className="w-24 h-24 md:w-32 md:h-32 object-contain drop-shadow-lg"
         />
         <div className="text-center">
-          <h2 className="text-5xl md:text-6xl font-display text-gold drop-shadow-lg"
+          <h2 className="text-6xl md:text-8xl font-display text-gold drop-shadow-lg"
             style={{ textShadow: '0 0 30px hsl(var(--gold) / 0.5)' }}
           >
             {formatPapers(currentPapers)}
           </h2>
-          <p className="text-base text-foreground/80 font-medium">A+ Papers</p>
+          <p className="text-xl md:text-2xl text-foreground/80 font-medium">A+ Papers</p>
         </div>
       </div>
 
@@ -104,14 +104,14 @@ export function PaperClicker({ currentPapers, passiveIncome, clickPower, onClick
       </button>
 
       {/* Stats - Compact visual counters */}
-      <div className="mt-6 flex items-center gap-6">
-        <div className="flex items-center gap-2 bg-secondary/60 backdrop-blur-sm px-4 py-2 rounded-full border border-accent/30">
-          <span className="text-accent font-display text-lg">{formatPapers(clickPower)}</span>
-          <span className="text-foreground/70 text-sm">/click</span>
+      <div className="mt-8 flex items-center gap-8">
+        <div className="flex items-center gap-3 bg-secondary/60 backdrop-blur-sm px-8 py-4 rounded-full border border-accent/30">
+          <span className="text-accent font-display text-3xl md:text-4xl">{formatPapers(clickPower)}</span>
+          <span className="text-foreground/70 text-xl md:text-2xl">/click</span>
         </div>
-        <div className="flex items-center gap-2 bg-secondary/60 backdrop-blur-sm px-4 py-2 rounded-full border border-gold/30">
-          <span className="text-gold font-display text-lg">{formatPapers(passiveIncome)}</span>
-          <span className="text-foreground/70 text-sm">/sec</span>
+        <div className="flex items-center gap-3 bg-secondary/60 backdrop-blur-sm px-8 py-4 rounded-full border border-gold/30">
+          <span className="text-gold font-display text-3xl md:text-4xl">{formatPapers(passiveIncome)}</span>
+          <span className="text-foreground/70 text-xl md:text-2xl">/sec</span>
         </div>
       </div>
     </div>
