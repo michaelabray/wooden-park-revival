@@ -52,7 +52,7 @@ export function PaperClicker({ currentPapers, passiveIncome, clickPower, onClick
       {/* Paper Counter with icon */}
       <div className="flex items-center gap-3 mb-6">
         <img 
-          src="/assets/icons/paper.webp" 
+          src="assets/icons/paper.webp" 
           alt="Papers" 
           className="w-10 h-10 object-contain"
         />
@@ -72,7 +72,7 @@ export function PaperClicker({ currentPapers, passiveIncome, clickPower, onClick
         }`}
       >
         <img 
-          src="/assets/hero/pencil.webp" 
+          src="assets/hero/pencil.webp" 
           alt="Click to write papers"
           className="w-full h-full object-contain drop-shadow-2xl"
           style={{
@@ -93,7 +93,7 @@ export function PaperClicker({ currentPapers, passiveIncome, clickPower, onClick
             } as React.CSSProperties}
           >
             <img 
-              src="/assets/icons/click-plus-one.webp" 
+              src="assets/icons/click-plus-one.webp" 
               alt="+1"
               className="w-12 h-12 object-contain"
             />
