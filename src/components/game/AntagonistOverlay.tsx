@@ -34,15 +34,15 @@ export function AntagonistOverlay({ type, onSuccess, onFailure }: AntagonistOver
   const isSoggy = type === 'soggy';
   const dialogue = ANTAGONIST_DIALOGUE[type];
   const characterImage = isSoggy 
-    ? './assets/characters/soggy.webp' 
-    : './assets/characters/sentinel.webp';
+    ? '/assets/characters/soggy.webp' 
+    : '/assets/characters/sentinel.webp';
 
   return (
     <div className={`overlay-antagonist ${isDismissing ? 'opacity-0' : ''} transition-opacity duration-200`}>
       <div 
         className="relative max-w-md w-full mx-4 animate-bounce-in rounded-xl overflow-hidden"
         style={{
-          backgroundImage: `url('./assets/ui/panel-bg.webp')`,
+          backgroundImage: `url('/assets/ui/panel-bg.webp')`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
         }}
