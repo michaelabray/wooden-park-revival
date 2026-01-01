@@ -41,7 +41,7 @@ export const UNITS: UnitType[] = [
     baseCost: 15,
     baseYield: 0.0575, // 0.05 * 1.15 = 0.0575 (15% buff)
     icon: 'Cloud',
-    image: '/assets/units/daydreamer.webp',
+    image: 'assets/units/daydreamer.webp',
   },
   {
     id: 'overachiever',
@@ -50,7 +50,7 @@ export const UNITS: UnitType[] = [
     baseCost: 100,
     baseYield: 0.345, // 0.30 * 1.15 = 0.345 (15% buff)
     icon: 'Star',
-    image: '/assets/units/overachiever.webp',
+    image: 'assets/units/overachiever.webp',
   },
   {
     id: 'varsity-bobkat',
@@ -59,7 +59,7 @@ export const UNITS: UnitType[] = [
     baseCost: 500,
     baseYield: 1.80,
     icon: 'Trophy',
-    image: '/assets/units/varsity-bobkat.webp',
+    image: 'assets/units/varsity-bobkat.webp',
   },
   {
     id: 'ai-whiz',
@@ -68,7 +68,7 @@ export const UNITS: UnitType[] = [
     baseCost: 2500,
     baseYield: 10.00,
     icon: 'Cpu',
-    image: '/assets/units/ai-whiz.webp',
+    image: 'assets/units/ai-whiz.webp',
   },
   {
     id: 'rogue-graduate',
@@ -77,7 +77,7 @@ export const UNITS: UnitType[] = [
     baseCost: 10000,
     baseYield: 60.00,
     icon: 'GraduationCap',
-    image: '/assets/units/rogue-graduate.webp',
+    image: 'assets/units/rogue-graduate.webp',
   },
 ];
 
@@ -100,7 +100,7 @@ export const BLUEPRINTS: BlueprintPiece[] = [
     cost: 100,
     effect: '+20% Click Power',
     icon: 'Footprints',
-    image: '/assets/blueprints/steps.webp',
+    image: 'assets/blueprints/steps.webp',
   },
   {
     id: 'slide',
@@ -109,7 +109,7 @@ export const BLUEPRINTS: BlueprintPiece[] = [
     cost: 250,
     effect: '1.5x Passive Yield',
     icon: 'TrendingDown',
-    image: '/assets/blueprints/slide.webp',
+    image: 'assets/blueprints/slide.webp',
   },
   {
     id: 'swing',
@@ -118,7 +118,7 @@ export const BLUEPRINTS: BlueprintPiece[] = [
     cost: 500,
     effect: '-50% Antagonist Frequency',
     icon: 'Wind',
-    image: '/assets/blueprints/swings.webp',
+    image: 'assets/blueprints/swings.webp',
   },
   {
     id: 'walls',
@@ -127,7 +127,7 @@ export const BLUEPRINTS: BlueprintPiece[] = [
     cost: 1000,
     effect: '3x Paper Value',
     icon: 'Boxes',
-    image: '/assets/blueprints/wall.webp',
+    image: 'assets/blueprints/wall.webp',
   },
   {
     id: 'statue',
@@ -136,7 +136,7 @@ export const BLUEPRINTS: BlueprintPiece[] = [
     cost: 2500,
     effect: 'Victory Achieved!',
     icon: 'Crown',
-    image: '/assets/blueprints/founder.webp',
+    image: 'assets/blueprints/founder.webp',
   },
 ];
 
