@@ -50,7 +50,7 @@ export function FruitSnackBoost({
     <div className={`bento-card transition-all duration-300 ${isActive ? 'border-warning/50 glow-gold' : ''}`}>
       <div className="flex items-center gap-3 mb-3">
         <img 
-          src="./assets/icons/fruit-snack.webp" 
+          src="/assets/icons/fruit-snack.webp" 
           alt="Fruit Snack"
           className={`w-12 h-12 object-contain ${isActive ? 'animate-bounce' : ''}`}
         />
@@ -87,7 +87,7 @@ export function FruitSnackBoost({
           }`}
         >
           <img 
-            src="./assets/ui/button.webp" 
+            src="/assets/ui/button.webp" 
             alt=""
             className="absolute inset-0 w-full h-full object-cover"
             style={{ filter: !canAfford ? 'grayscale(50%)' : 'none' }}
