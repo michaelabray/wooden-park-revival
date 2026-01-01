@@ -1,13 +1,4 @@
 import { UNITS, calculateCost, formatPapers } from '@/lib/gameUtils';
-import { Cloud, Star, Trophy, Cpu, GraduationCap } from 'lucide-react';
-
-const ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
-  Cloud,
-  Star,
-  Trophy,
-  Cpu,
-  GraduationCap,
-};
 
 interface UnitShopProps {
   currentPapers: number;
@@ -24,7 +15,6 @@ export function UnitShop({ currentPapers, units, onBuy }: UnitShopProps) {
           const owned = units[unit.id] || 0;
           const cost = calculateCost(unit.baseCost, owned);
           const canAfford = currentPapers >= cost;
-          const IconComponent = ICONS[unit.icon];
 
           return (
             <button
@@ -33,8 +23,12 @@ export function UnitShop({ currentPapers, units, onBuy }: UnitShopProps) {
               disabled={!canAfford}
               className="unit-card w-full text-left"
             >
-              <div className="w-12 h-12 rounded-lg bg-secondary flex items-center justify-center shrink-0">
-                {IconComponent && <IconComponent className="w-6 h-6 text-accent" />}
+              <div className="w-14 h-14 rounded-lg bg-secondary flex items-center justify-center shrink-0 overflow-hidden">
+                <img 
+                  src={unit.image} 
+                  alt={unit.name}
+                  className="w-12 h-12 object-contain"
+                />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between gap-2">
@@ -49,7 +43,7 @@ export function UnitShop({ currentPapers, units, onBuy }: UnitShopProps) {
                     {formatPapers(cost)} papers
                   </span>
                   <span className="text-xs text-accent">
-                    +{unit.baseYield}/sec
+                    +{unit.baseYield.toFixed(2)}/sec
                   </span>
                 </div>
               </div>

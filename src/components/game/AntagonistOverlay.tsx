@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
-import { UtensilsCrossed, ShieldAlert, X } from 'lucide-react';
+import { X } from 'lucide-react';
+import { ANTAGONIST_DIALOGUE } from '@/lib/gameUtils';
+import { SlideToStudy } from './SlideToStudy';
 
 interface AntagonistOverlayProps {
   type: 'soggy' | 'sentinel';
@@ -24,55 +26,65 @@ export function AntagonistOverlay({ type, onSuccess, onFailure }: AntagonistOver
     return () => clearTimeout(timer);
   }, [timeLeft, onFailure]);
 
-  const handleDefend = useCallback(() => {
+  const handleSlideComplete = useCallback(() => {
     setIsDismissing(true);
     setTimeout(onSuccess, 200);
   }, [onSuccess]);
 
   const isSoggy = type === 'soggy';
+  const dialogue = ANTAGONIST_DIALOGUE[type];
+  const characterImage = isSoggy 
+    ? './assets/characters/soggy.webp' 
+    : './assets/characters/sentinel.webp';
 
   return (
     <div className={`overlay-antagonist ${isDismissing ? 'opacity-0' : ''} transition-opacity duration-200`}>
-      <div className="bento-card-accent max-w-md w-full mx-4 animate-bounce-in">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-3">
-            <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
-              isSoggy ? 'bg-warning/20' : 'bg-destructive/20'
-            }`}>
-              {isSoggy ? (
-                <UtensilsCrossed className="w-6 h-6 text-warning" />
-              ) : (
-                <ShieldAlert className="w-6 h-6 text-destructive" />
-              )}
-            </div>
+      <div 
+        className="relative max-w-md w-full mx-4 animate-bounce-in rounded-xl overflow-hidden"
+        style={{
+          backgroundImage: `url('./assets/ui/panel-bg.webp')`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+        }}
+      >
+        <div className="bg-background/85 p-6 backdrop-blur-sm">
+          {/* Timer */}
+          <div className={`absolute top-4 right-4 text-3xl font-display ${
+            timeLeft <= 2 ? 'text-destructive animate-shake' : 'text-warning'
+          }`}>
+            {timeLeft}s
+          </div>
+
+          {/* Character and Title */}
+          <div className="flex items-start gap-4 mb-4">
+            <img 
+              src={characterImage}
+              alt={dialogue.title}
+              className="w-20 h-20 object-contain animate-bounce"
+            />
             <div>
-              <h2 className="font-display text-2xl text-foreground">
-                {isSoggy ? 'CHEF SOGGY!' : 'SAFETY SENTINEL!'}
+              <h2 className="font-display text-2xl md:text-3xl text-foreground">
+                {dialogue.title}
               </h2>
-              <p className="text-sm text-muted-foreground">
-                {isSoggy ? 'Soggy Tray Incoming!' : 'Evidence Detected!'}
+              <p className="text-sm text-foreground/80 mt-1">
+                {dialogue.line}
               </p>
             </div>
           </div>
-          <div className={`text-3xl font-display ${timeLeft <= 2 ? 'text-destructive animate-shake' : 'text-warning'}`}>
-            {timeLeft}s
-          </div>
+
+          {/* Slide to Study */}
+          <SlideToStudy 
+            onComplete={handleSlideComplete}
+            label="Slide to Study →"
+          />
+
+          {/* Penalty warning */}
+          <p className="text-xs text-muted-foreground text-center mt-3">
+            {isSoggy 
+              ? 'Fail: Production stops for 20 seconds' 
+              : 'Fail: Lose 10% of your papers'}
+          </p>
         </div>
-
-        <p className="text-sm text-foreground/80 mb-4">
-          {isSoggy
-            ? 'Chef Soggy is serving mystery meatloaf! Avoid it or production stops for 20 seconds!'
-            : 'The Safety Sentinel spotted your papers! Hide them or lose 10%!'}
-        </p>
-
-        <button
-          onClick={handleDefend}
-          className={`w-full py-4 rounded-lg font-display text-xl tracking-wide transition-all hover:scale-105 active:scale-95 ${
-            isSoggy ? 'btn-accent' : 'btn-navy'
-          }`}
-        >
-          {isSoggy ? 'DODGE THE TRAY!' : 'HIDE EVIDENCE!'}
-        </button>
       </div>
     </div>
   );
