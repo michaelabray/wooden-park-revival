@@ -78,7 +78,7 @@ export function TrophyMenu({
       <div 
         className="relative max-w-md w-full mx-4 animate-bounce-in"
         style={{
-          backgroundImage: `url('./assets/ui/panel-bg.webp')`,
+          backgroundImage: `url('/assets/ui/panel-bg.webp')`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
         }}
@@ -93,7 +93,7 @@ export function TrophyMenu({
 
           <div className="flex items-center gap-3 mb-6">
             <img 
-              src="./assets/ui/trophy.webp" 
+              src="/assets/ui/trophy.webp" 
               alt="Trophy" 
               className="w-12 h-12 object-contain"
             />
