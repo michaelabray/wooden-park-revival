@@ -21,7 +21,7 @@ export function SplashScreen({ onComplete }: SplashScreenProps) {
       clearTimeout(timer);
       clearTimeout(completeTimer);
     };
-  }, [onComplete]);
+  }, []); // Changing this to an empty array ensures it only runs once on mount
 
   return (
     <div 
