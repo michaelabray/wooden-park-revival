@@ -145,9 +145,9 @@ export default function Index() {
 
       {/* Shop Modal (replaces old grid layout for units/blueprints/graduation) */}
       {showShop && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm" onClick={() => setShowShop(false)}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/60" onClick={() => setShowShop(false)}>
           <div 
-            className="relative max-w-2xl w-full mx-4 max-h-[80vh] overflow-y-auto animate-bounce-in rounded-xl"
+            className="relative max-w-3xl w-full mx-6 max-h-[85vh] overflow-y-auto animate-bounce-in rounded-2xl"
             onClick={e => e.stopPropagation()}
             style={{
               backgroundImage: `url('./assets/ui/panel-bg.webp')`,
@@ -155,19 +155,19 @@ export default function Index() {
               backgroundPosition: 'center',
             }}
           >
-            <div className="p-6">
+            <div className="p-10 md:p-12">
               <button
                 onClick={() => setShowShop(false)}
-                className="absolute top-4 right-4 p-2 rounded-full bg-secondary/80 hover:bg-secondary transition-colors z-10"
+                className="absolute top-6 right-6 p-3 rounded-full bg-secondary/80 hover:bg-secondary transition-colors z-10"
               >
-                <span className="text-foreground text-xl">×</span>
+                <span className="text-foreground text-2xl">×</span>
               </button>
 
-              <h2 className="font-display text-3xl text-gold mb-6 text-center">Academy Shop</h2>
+              <h2 className="font-display text-4xl text-gold mb-8 text-center">Academy Shop</h2>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <UnitShop currentPapers={state.currentPapers} units={state.units} onBuy={buyUnit} />
-                <div className="space-y-4">
+                <div className="space-y-6">
                   <GraduationPanel
                     currentPapers={state.currentPapers}
                     totalPapersLifetime={state.totalPapersLifetime}
