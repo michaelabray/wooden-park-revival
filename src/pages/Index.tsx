@@ -16,6 +16,7 @@ import { SplashScreen } from '@/components/game/SplashScreen';
 import { ParallaxBackground, BlueprintDisplay } from '@/components/game/ParallaxBackground';
 import { TrophyMenu } from '@/components/game/TrophyMenu';
 import { SettingsPanel } from '@/components/game/SettingsPanel';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { X } from 'lucide-react';
 
 export default function Index() {
@@ -34,6 +35,7 @@ export default function Index() {
     graduate,
     applyAntagonistPenalty,
     incrementAntagonistsDefeated,
+    triggerCriticalStudy,
     addPapers,
     addSplinters,
     wipeSave,
@@ -45,6 +47,7 @@ export default function Index() {
   const [showTrophyMenu, setShowTrophyMenu] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [antagonist, setAntagonist] = useState<'soggy' | 'sentinel' | null>(null);
+  const [antagonistStartTime, setAntagonistStartTime] = useState<number>(0);
   const [showVictory, setShowVictory] = useState(false);
   const [showShop, setShowShop] = useState(false);
   const [lastAntagonistTime, setLastAntagonistTime] = useState(Date.now());
@@ -56,7 +59,7 @@ export default function Index() {
     }
   }, [state.unlockedBlueprints, state.hasSeenVictory, showVictory]);
 
-  // Random antagonist spawns (60-90 seconds)
+  // Random antagonist spawns (60-90 seconds) - reduced by 30% with Tier 2 prestige
   useEffect(() => {
     if (showSplash) return;
     
@@ -65,23 +68,38 @@ export default function Index() {
       
       const now = Date.now();
       const timeSinceLastAntagonist = now - lastAntagonistTime;
-      const minDelay = state.unlockedBlueprints.includes('swing') ? 90000 : 60000;
-      const maxDelay = state.unlockedBlueprints.includes('swing') ? 180000 : 90000;
+      
+      // Base delays
+      let minDelay = state.unlockedBlueprints.includes('swing') ? 90000 : 60000;
+      let maxDelay = state.unlockedBlueprints.includes('swing') ? 180000 : 90000;
+      
+      // Apply Tier 2 prestige bonus (30% less often = 30% longer delays)
+      if (state.prestigeTier >= 2) {
+        minDelay = Math.floor(minDelay * 1.3);
+        maxDelay = Math.floor(maxDelay * 1.3);
+      }
       
       if (timeSinceLastAntagonist >= minDelay && Math.random() < 0.1) {
         setAntagonist(Math.random() > 0.5 ? 'soggy' : 'sentinel');
+        setAntagonistStartTime(Date.now());
         setLastAntagonistTime(now);
       }
     };
 
     const interval = setInterval(checkAntagonist, 5000);
     return () => clearInterval(interval);
-  }, [antagonist, state.antagonistPaused, state.unlockedBlueprints, showSplash, lastAntagonistTime]);
+  }, [antagonist, state.antagonistPaused, state.unlockedBlueprints, showSplash, lastAntagonistTime, state.prestigeTier]);
 
-  const handleAntagonistSuccess = useCallback(() => {
+  const handleAntagonistSuccess = useCallback((completionTime: number) => {
     incrementAntagonistsDefeated();
+    
+    // Check for Critical Study (completed within 1.5 seconds)
+    if (completionTime <= 1500) {
+      triggerCriticalStudy();
+    }
+    
     setAntagonist(null);
-  }, [incrementAntagonistsDefeated]);
+  }, [incrementAntagonistsDefeated, triggerCriticalStudy]);
 
   const handleAntagonistFailure = useCallback(() => {
     if (antagonist) {
@@ -108,8 +126,8 @@ export default function Index() {
       {/* Parallax Background */}
       <ParallaxBackground unlockedBlueprints={state.unlockedBlueprints} />
 
-      {/* Main layout container - 100vh, no scrolling */}
-      <div className="relative z-10 h-full w-full flex flex-col">
+      {/* Main layout container - 100vh, no scrolling, pb-16 for ticker */}
+      <div className="relative z-10 h-full w-full flex flex-col pb-16">
         {/* Top Row: HUD */}
         <div className="px-2 md:px-4">
           <GameHeader
@@ -133,7 +151,7 @@ export default function Index() {
               <img 
                 src="/wooden-park-revival/assets/ui/cart.webp" 
                 alt="Shop"
-                className="w-[15vw] md:w-[40%] max-w-[80px] min-w-[40px] object-contain drop-shadow-lg"
+                className="w-[20vw] md:w-[40%] max-w-[120px] min-w-[60px] object-contain drop-shadow-lg"
               />
             </button>
           </div>
@@ -145,12 +163,13 @@ export default function Index() {
               passiveIncome={passiveIncome}
               clickPower={clickPower}
               onClick={handleClick}
+              criticalStudyActive={state.criticalStudyActive}
             />
           </div>
 
           {/* Right Column: Blueprints grid */}
           <div className="hidden md:flex items-center justify-center order-2 md:order-3 p-2">
-            <div className="w-full max-w-[150px]">
+            <div className="w-full max-w-[180px]">
               <BlueprintDisplay unlockedBlueprints={state.unlockedBlueprints} />
             </div>
           </div>
@@ -167,55 +186,60 @@ export default function Index() {
             autoBoostEnabled={state.autoBoostEnabled}
             onPurchaseAutoBoost={purchaseAutoBoost}
             onToggleAutoBoost={toggleAutoBoost}
+            criticalStudyActive={state.criticalStudyActive}
+            criticalStudyEndTime={state.criticalStudyEndTime}
           />
         </div>
       </div>
 
-      {/* Shop Modal */}
-      {showShop && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/60" onClick={() => setShowShop(false)}>
-          <div 
-            className="relative w-[85vw] max-w-2xl max-h-[80vh] overflow-hidden animate-bounce-in"
-            onClick={e => e.stopPropagation()}
-          >
-            {/* Panel background image */}
-            <img 
-              src="/wooden-park-revival/assets/ui/panel-bg.webp"
-              alt=""
-              className="absolute inset-0 w-full h-full object-cover"
-            />
-            
-            {/* Content with padding inside the parchment */}
-            <div className="relative p-[10%] max-h-[80vh] overflow-y-auto">
-              <button
-                onClick={() => setShowShop(false)}
-                className="absolute top-[6%] right-[6%] p-2 rounded-full bg-secondary/60 hover:bg-secondary/80 transition-colors z-10"
-              >
-                <X className="w-5 h-5 text-foreground" />
-              </button>
-
-              <h2 className="font-display text-2xl text-gold mb-4 text-center">Academy Shop</h2>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <UnitShop currentPapers={state.currentPapers} units={state.units} onBuy={buyUnit} />
-                <div className="space-y-4">
-                  <GraduationPanel
-                    currentPapers={state.currentPapers}
-                    totalPapersLifetime={state.totalPapersLifetime}
-                    currentSplinters={state.goldenSplinters}
-                    onGraduate={graduate}
-                  />
-                  <BlueprintShop
-                    goldenSplinters={state.goldenSplinters}
-                    unlockedBlueprints={state.unlockedBlueprints}
-                    onBuy={buyBlueprint}
-                  />
-                </div>
-              </div>
+      {/* Shop Modal - Shadcn Dialog with dark backdrop */}
+      <Dialog open={showShop} onOpenChange={setShowShop}>
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto bg-card border-border">
+          <DialogHeader>
+            <DialogTitle className="font-display text-2xl text-gold flex items-center gap-2">
+              <img 
+                src="/wooden-park-revival/assets/ui/cart.webp" 
+                alt=""
+                className="w-8 h-8 object-contain"
+              />
+              Academy Shop
+            </DialogTitle>
+          </DialogHeader>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+            <UnitShop currentPapers={state.currentPapers} units={state.units} onBuy={buyUnit} />
+            <div className="space-y-4">
+              <GraduationPanel
+                currentPapers={state.currentPapers}
+                totalPapersLifetime={state.totalPapersLifetime}
+                currentSplinters={state.goldenSplinters}
+                onGraduate={graduate}
+              />
+              <BlueprintShop
+                goldenSplinters={state.goldenSplinters}
+                unlockedBlueprints={state.unlockedBlueprints}
+                onBuy={buyBlueprint}
+              />
             </div>
           </div>
-        </div>
-      )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Settings Modal - Shadcn Dialog */}
+      <Dialog open={showSettings} onOpenChange={setShowSettings}>
+        <DialogContent className="max-w-md bg-card border-border">
+          <DialogHeader>
+            <DialogTitle className="font-display text-xl text-foreground flex items-center gap-2">
+              <img 
+                src="/wooden-park-revival/assets/ui/cog.webp" 
+                alt=""
+                className="w-6 h-6 object-contain"
+              />
+              Settings
+            </DialogTitle>
+          </DialogHeader>
+          <SettingsPanel />
+        </DialogContent>
+      </Dialog>
 
       <NewsTicker />
 
@@ -224,36 +248,16 @@ export default function Index() {
       )}
 
       {antagonist && (
-        <AntagonistOverlay type={antagonist} onSuccess={handleAntagonistSuccess} onFailure={handleAntagonistFailure} />
+        <AntagonistOverlay 
+          type={antagonist} 
+          onSuccess={handleAntagonistSuccess} 
+          onFailure={handleAntagonistFailure}
+          startTime={antagonistStartTime}
+        />
       )}
 
       {showDevMenu && (
         <DevMenu onClose={() => setShowDevMenu(false)} onAddPapers={addPapers} onAddSplinters={addSplinters} onWipeSave={wipeSave} />
-      )}
-
-      {showSettings && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/60" onClick={() => setShowSettings(false)}>
-          <div 
-            className="relative w-[85vw] max-w-md max-h-[80vh] overflow-hidden animate-bounce-in"
-            onClick={e => e.stopPropagation()}
-          >
-            <img 
-              src="/wooden-park-revival/assets/ui/panel-bg.webp"
-              alt=""
-              className="absolute inset-0 w-full h-full object-cover"
-            />
-            <div className="relative p-[12%]">
-              <button
-                onClick={() => setShowSettings(false)}
-                className="absolute top-[8%] right-[8%] p-2 rounded-full bg-secondary/60 hover:bg-secondary/80 transition-colors z-10"
-              >
-                <X className="w-5 h-5 text-foreground" />
-              </button>
-              <h2 className="font-display text-xl text-foreground mb-4">Settings</h2>
-              <SettingsPanel />
-            </div>
-          </div>
-        </div>
       )}
 
       <TrophyMenu
@@ -263,6 +267,11 @@ export default function Index() {
         totalPapersGenerated={state.totalPapersLifetime}
         unlockedBlueprints={state.unlockedBlueprints}
         antagonistsDefeated={state.antagonistsDefeated}
+        goldenSplinters={state.goldenSplinters}
+        prestigeTier={state.prestigeTier}
+        onPurchasePrestige={(tier, cost) => {
+          // Purchase prestige handled via useGameState
+        }}
       />
 
       {showVictory && (
