@@ -17,6 +17,9 @@ export interface GameState {
   antagonistsDefeated: number;
   autoBoostEnabled: boolean;
   autoBoostPurchased: boolean;
+  prestigeTier: number;
+  criticalStudyActive: boolean;
+  criticalStudyEndTime: number;
 }
 
 const INITIAL_STATE: GameState = {
@@ -35,6 +38,9 @@ const INITIAL_STATE: GameState = {
   antagonistsDefeated: 0,
   autoBoostEnabled: false,
   autoBoostPurchased: false,
+  prestigeTier: 0,
+  criticalStudyActive: false,
+  criticalStudyEndTime: 0,
 };
 
 const STORAGE_KEY = 'bk-academy-save';
@@ -55,6 +61,9 @@ export function useGameState() {
           antagonistsDefeated: parsed.antagonistsDefeated || 0,
           autoBoostEnabled: parsed.autoBoostEnabled || false,
           autoBoostPurchased: parsed.autoBoostPurchased || false,
+          prestigeTier: parsed.prestigeTier || 0,
+          criticalStudyActive: false,
+          criticalStudyEndTime: 0,
         };
       } catch {
         return INITIAL_STATE;
@@ -79,6 +88,15 @@ export function useGameState() {
       antagonistsDefeated: prev.antagonistsDefeated + 1,
     }));
   }, []);
+
+  // Trigger Critical Study (5x production for 10 seconds)
+  const triggerCriticalStudy = useCallback(() => {
+    setState(prev => ({
+      ...prev,
+      criticalStudyActive: true,
+      criticalStudyEndTime: Date.now() + 10000,
+    }));
+  }, []);
   
   // Calculate passive income per second
   const getPassiveIncome = useCallback(() => {
@@ -94,20 +112,30 @@ export function useGameState() {
     // Apply fruit snack multiplier
     const fruitSnackMult = state.fruitSnackActive ? 2 : 1;
 
+    // Apply critical study multiplier (5x)
+    const criticalMult = state.criticalStudyActive ? 5 : 1;
+
     // Apply blueprint bonuses
     const slideMult = state.unlockedBlueprints.includes('slide') ? 1.5 : 1;
     const wallsMult = state.unlockedBlueprints.includes('walls') ? 3 : 1;
 
-    return baseIncome * splinterMult * fruitSnackMult * slideMult * wallsMult;
-  }, [state.units, state.goldenSplinters, state.fruitSnackActive, state.unlockedBlueprints]);
+    return baseIncome * splinterMult * fruitSnackMult * slideMult * wallsMult * criticalMult;
+  }, [state.units, state.goldenSplinters, state.fruitSnackActive, state.unlockedBlueprints, state.criticalStudyActive]);
 
   // Calculate click power
   const getClickPower = useCallback(() => {
     const splinterMult = getSplinterMultiplier(state.goldenSplinters);
     const stepsMult = state.unlockedBlueprints.includes('steps') ? 1.2 : 1;
     const wallsMult = state.unlockedBlueprints.includes('walls') ? 3 : 1;
-    return 1 * splinterMult * stepsMult * wallsMult;
-  }, [state.goldenSplinters, state.unlockedBlueprints]);
+    
+    // Apply Tier 1 prestige bonus (+100% click power)
+    const prestigeMult = state.prestigeTier >= 1 ? 2 : 1;
+    
+    // Apply critical study multiplier (5x)
+    const criticalMult = state.criticalStudyActive ? 5 : 1;
+    
+    return 1 * splinterMult * stepsMult * wallsMult * prestigeMult * criticalMult;
+  }, [state.goldenSplinters, state.unlockedBlueprints, state.prestigeTier, state.criticalStudyActive]);
 
   // Handle offline progress on mount
   useEffect(() => {
@@ -119,7 +147,10 @@ export function useGameState() {
         const secondsElapsed = Math.floor((now - parsedState.lastSaveTimestamp) / 1000);
         
         if (secondsElapsed > 10) {
-          // Calculate offline earnings (50% of normal rate)
+          // Calculate offline earnings
+          // Base rate is 50%, but Tier 3 prestige increases to 75%
+          const offlineRate = (parsedState.prestigeTier || 0) >= 3 ? 0.75 : 0.5;
+          
           let baseIncome = 0;
           UNITS.forEach(unit => {
             const owned = parsedState.units[unit.id] || 0;
@@ -131,7 +162,7 @@ export function useGameState() {
           const wallsMult = parsedState.unlockedBlueprints.includes('walls') ? 3 : 1;
           
           const passiveRate = baseIncome * splinterMult * slideMult * wallsMult;
-          const earnings = Math.floor(passiveRate * 0.5 * secondsElapsed);
+          const earnings = Math.floor(passiveRate * offlineRate * secondsElapsed);
           
           if (earnings > 0) {
             setOfflineEarnings(earnings);
@@ -141,6 +172,7 @@ export function useGameState() {
               totalPapersLifetime: prev.totalPapersLifetime + earnings,
               lastSaveTimestamp: now,
               fruitSnackActive: false,
+              criticalStudyActive: false,
             }));
           }
         }
@@ -156,6 +188,9 @@ export function useGameState() {
       localStorage.setItem(STORAGE_KEY, JSON.stringify({
         ...stateRef.current,
         lastSaveTimestamp: Date.now(),
+        // Don't persist critical study across sessions
+        criticalStudyActive: false,
+        criticalStudyEndTime: 0,
       }));
     };
 
@@ -177,6 +212,9 @@ export function useGameState() {
         
         // Check fruit snack expiry
         const fruitSnackActive = prev.fruitSnackActive && now < prev.fruitSnackEndTime;
+        
+        // Check critical study expiry
+        const criticalStudyActive = prev.criticalStudyActive && now < prev.criticalStudyEndTime;
         
         // Auto-boost logic: if enabled and not active, and can afford
         let newPapers = prev.currentPapers;
@@ -200,11 +238,12 @@ export function useGameState() {
         const fruitSnackMult = newFruitSnackActive ? 2 : 1;
         const slideMult = prev.unlockedBlueprints.includes('slide') ? 1.5 : 1;
         const wallsMult = prev.unlockedBlueprints.includes('walls') ? 3 : 1;
+        const criticalMult = criticalStudyActive ? 5 : 1;
         
         // Check antagonist pause expiry
         const antagonistPaused = prev.antagonistPaused && now < prev.antagonistPausedUntil;
 
-        const income = baseIncome * splinterMult * fruitSnackMult * slideMult * wallsMult;
+        const income = baseIncome * splinterMult * fruitSnackMult * slideMult * wallsMult * criticalMult;
 
         return {
           ...prev,
@@ -213,6 +252,7 @@ export function useGameState() {
           fruitSnackActive: newFruitSnackActive,
           fruitSnackEndTime: newFruitSnackEndTime,
           antagonistPaused,
+          criticalStudyActive,
         };
       });
     }, 1000);
@@ -304,6 +344,19 @@ export function useGameState() {
     return false;
   }, [state.goldenSplinters, state.unlockedBlueprints]);
 
+  // Purchase prestige tier
+  const purchasePrestige = useCallback((tier: number, cost: number) => {
+    if (state.goldenSplinters >= cost && state.prestigeTier === tier - 1) {
+      setState(prev => ({
+        ...prev,
+        goldenSplinters: prev.goldenSplinters - cost,
+        prestigeTier: tier,
+      }));
+      return true;
+    }
+    return false;
+  }, [state.goldenSplinters, state.prestigeTier]);
+
   // Graduate (prestige)
   const graduate = useCallback(() => {
     const newSplinters = calculateSplinters(state.totalPapersLifetime);
@@ -317,6 +370,7 @@ export function useGameState() {
         antagonistsDefeated: prev.antagonistsDefeated,
         autoBoostPurchased: prev.autoBoostPurchased,
         autoBoostEnabled: prev.autoBoostEnabled,
+        prestigeTier: prev.prestigeTier,
         lastSaveTimestamp: Date.now(),
       }));
       return splinterGain;
@@ -380,9 +434,11 @@ export function useGameState() {
     purchaseAutoBoost,
     toggleAutoBoost,
     buyBlueprint,
+    purchasePrestige,
     graduate,
     applyAntagonistPenalty,
     incrementAntagonistsDefeated,
+    triggerCriticalStudy,
     addPapers,
     addSplinters,
     wipeSave,

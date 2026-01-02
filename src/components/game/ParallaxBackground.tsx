@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { BLUEPRINTS } from '@/lib/gameUtils';
 
 interface ParallaxBackgroundProps {
@@ -16,7 +16,7 @@ const BLUEPRINT_IMAGES: Record<string, string> = {
 
 export function ParallaxBackground({ unlockedBlueprints }: ParallaxBackgroundProps) {
   const [skyOffset, setSkyOffset] = useState(0);
-  const [direction, setDirection] = useState(1); // 1 = right-to-left, -1 = left-to-right
+  const directionRef = useRef(1); // 1 = right-to-left, -1 = left-to-right
 
   useEffect(() => {
     let animationFrame: number;
@@ -27,16 +27,16 @@ export function ParallaxBackground({ unlockedBlueprints }: ParallaxBackgroundPro
       const delta = time - lastTime;
       lastTime = time;
 
-      // Ping-pong parallax movement
+      // Ping-pong parallax movement - 50% slower (0.0025 instead of 0.005)
       setSkyOffset(prev => {
-        const newOffset = prev + delta * 0.005 * direction;
+        const newOffset = prev + delta * 0.0025 * directionRef.current;
         
         // Reverse direction at boundaries
         if (newOffset >= 100) {
-          setDirection(-1);
+          directionRef.current = -1;
           return 100;
         } else if (newOffset <= 0) {
-          setDirection(1);
+          directionRef.current = 1;
           return 0;
         }
         
@@ -48,7 +48,7 @@ export function ParallaxBackground({ unlockedBlueprints }: ParallaxBackgroundPro
 
     animationFrame = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(animationFrame);
-  }, [direction]);
+  }, []);
 
   return (
     <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
@@ -102,10 +102,10 @@ export function BlueprintDisplay({ unlockedBlueprints }: { unlockedBlueprints: s
                 <img
                   src={imageSrc}
                   alt={blueprint?.name || id}
-                  className="w-[45%] h-auto object-contain drop-shadow-lg animate-fade-in"
+                  className="w-[50%] h-auto object-contain drop-shadow-lg animate-fade-in"
                 />
               ) : (
-                <div className="w-[45%] aspect-square bg-muted/50 rounded-lg flex items-center justify-center">
+                <div className="w-[50%] aspect-square bg-muted/50 rounded-lg flex items-center justify-center">
                   <span className="text-muted-foreground text-[clamp(0.5rem,1vw,0.75rem)]">?</span>
                 </div>
               )}
@@ -120,7 +120,7 @@ export function BlueprintDisplay({ unlockedBlueprints }: { unlockedBlueprints: s
           <img
             src={BLUEPRINT_IMAGES.statue}
             alt="Founder Statue"
-            className="w-[50%] h-auto object-contain drop-shadow-2xl animate-bounce-in z-10"
+            className="w-[60%] h-auto object-contain drop-shadow-2xl animate-bounce-in z-10"
             style={{ filter: 'drop-shadow(0 0 20px hsl(var(--gold) / 0.6))' }}
           />
         </div>

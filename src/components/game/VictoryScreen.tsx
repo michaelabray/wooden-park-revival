@@ -1,15 +1,14 @@
-import { X } from 'lucide-react';
-
 interface VictoryScreenProps {
   onClose: () => void;
 }
 
 export function VictoryScreen({ onClose }: VictoryScreenProps) {
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-background/60">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-background/80">
       {/* Victory popup - image only, no code-generated text */}
-      <div 
-        className="relative w-[90vw] max-w-xl animate-bounce-in cursor-pointer"
+      {/* Entire image is clickable to dismiss */}
+      <button 
+        className="relative w-[90vw] max-w-xl animate-bounce-in focus:outline-none"
         onClick={onClose}
       >
         <img 
@@ -18,17 +17,12 @@ export function VictoryScreen({ onClose }: VictoryScreenProps) {
           className="w-full h-auto object-contain drop-shadow-2xl"
         />
         
-        {/* Transparent close button in top right */}
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onClose();
-          }}
-          className="absolute top-[5%] right-[5%] p-2 rounded-full bg-secondary/60 hover:bg-secondary/80 transition-colors"
-        >
-          <X className="w-6 h-6 text-foreground" />
-        </button>
-      </div>
+        {/* Transparent clickable overlay on "Continue Playing" area */}
+        <div 
+          className="absolute bottom-[10%] left-[20%] right-[20%] h-[15%] cursor-pointer"
+          aria-label="Continue Playing"
+        />
+      </button>
     </div>
   );
 }
