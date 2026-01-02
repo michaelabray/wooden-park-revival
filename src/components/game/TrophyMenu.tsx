@@ -74,57 +74,63 @@ export function TrophyMenu({
   const completedCount = milestones.filter(m => m.isComplete).length;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm" onClick={onClose}>
+    <div 
+      className="fixed inset-0 z-50 flex items-center justify-center bg-background/60" 
+      onClick={onClose}
+    >
       <div 
-        className="relative max-w-md w-full mx-4 animate-bounce-in rounded-xl overflow-hidden"
+        className="relative w-[85vw] max-w-lg max-h-[80vh] overflow-hidden animate-bounce-in"
         onClick={e => e.stopPropagation()}
-        style={{
-          backgroundImage: `url('./assets/ui/panel-bg.webp')`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-        }}
       >
-        <div className="p-6">
+        {/* Panel background image */}
+        <img 
+          src="/wooden-park-revival/assets/ui/panel-bg.webp"
+          alt=""
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+        
+        {/* Content overlay with padding inside the parchment */}
+        <div className="relative p-[12%]">
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 p-2 rounded-full bg-secondary/80 hover:bg-secondary transition-colors"
+            className="absolute top-[8%] right-[8%] p-2 rounded-full bg-secondary/60 hover:bg-secondary/80 transition-colors z-10"
           >
             <X className="w-5 h-5 text-foreground" />
           </button>
 
-          <div className="flex items-center gap-3 mb-6">
+          <div className="flex items-center gap-3 mb-4">
             <img 
-              src="./assets/ui/trophy.webp" 
+              src="/wooden-park-revival/assets/ui/trophy.webp" 
               alt="Trophy" 
-              className="w-12 h-12 object-contain"
+              className="w-10 h-10 object-contain"
             />
             <div>
-              <h2 className="font-display text-2xl text-gold">Milestones</h2>
-              <p className="text-sm text-muted-foreground">
+              <h2 className="font-display text-xl text-gold">Milestones</h2>
+              <p className="text-xs text-muted-foreground">
                 {completedCount}/{milestones.length} Complete
               </p>
             </div>
           </div>
 
           {/* Stats Summary */}
-          <div className="grid grid-cols-2 gap-3 mb-6">
-            <div className="bg-background/50 rounded-lg p-3 text-center">
-              <p className="text-xs text-muted-foreground">Total Splinters</p>
-              <p className="text-lg font-display text-gold">{formatPapers(totalSplintersEarned)}</p>
+          <div className="grid grid-cols-2 gap-2 mb-4">
+            <div className="bg-background/40 rounded-lg p-2 text-center">
+              <p className="text-[10px] text-muted-foreground">Total Splinters</p>
+              <p className="text-sm font-display text-gold">{formatPapers(totalSplintersEarned)}</p>
             </div>
-            <div className="bg-background/50 rounded-lg p-3 text-center">
-              <p className="text-xs text-muted-foreground">Antagonists Defeated</p>
-              <p className="text-lg font-display text-accent">{antagonistsDefeated}</p>
+            <div className="bg-background/40 rounded-lg p-2 text-center">
+              <p className="text-[10px] text-muted-foreground">Defeated</p>
+              <p className="text-sm font-display text-accent">{antagonistsDefeated}</p>
             </div>
           </div>
 
           {/* Founder Statue Progress Bar */}
-          <div className="bg-background/30 rounded-lg p-4 mb-4">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium text-foreground">Founder Statue Progress</span>
-              <span className="text-sm text-gold">{unlockedBlueprints.length}/5</span>
+          <div className="bg-background/30 rounded-lg p-3 mb-3">
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-xs font-medium text-foreground">Founder Progress</span>
+              <span className="text-xs text-gold">{unlockedBlueprints.length}/5</span>
             </div>
-            <div className="h-3 rounded-full bg-muted overflow-hidden">
+            <div className="h-2 rounded-full bg-muted overflow-hidden">
               <div 
                 className="h-full rounded-full transition-all duration-500"
                 style={{ 
@@ -136,30 +142,30 @@ export function TrophyMenu({
           </div>
 
           {/* Milestones List */}
-          <div className="space-y-3 max-h-64 overflow-y-auto">
+          <div className="space-y-2 max-h-40 overflow-y-auto">
             {milestones.map(milestone => (
               <div
                 key={milestone.id}
-                className={`flex items-center gap-3 p-3 rounded-lg transition-all ${
+                className={`flex items-center gap-2 p-2 rounded-lg transition-all ${
                   milestone.isComplete
                     ? 'bg-success/20'
                     : 'bg-background/30'
                 }`}
               >
-                <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
                   milestone.isComplete ? 'bg-success/30 text-success' : 'bg-muted text-muted-foreground'
                 }`}>
-                  {milestone.isComplete ? <Check className="w-5 h-5" /> : milestone.icon}
+                  {milestone.isComplete ? <Check className="w-4 h-4" /> : milestone.icon}
                 </div>
-                <div className="flex-1">
-                  <h4 className={`font-semibold text-sm ${
+                <div className="flex-1 min-w-0">
+                  <h4 className={`font-semibold text-xs ${
                     milestone.isComplete ? 'text-success' : 'text-foreground'
                   }`}>
                     {milestone.name}
                   </h4>
-                  <p className="text-xs text-muted-foreground">{milestone.description}</p>
+                  <p className="text-[10px] text-muted-foreground truncate">{milestone.description}</p>
                   {milestone.progress && !milestone.isComplete && (
-                    <div className="mt-1.5 h-1.5 rounded-full bg-muted overflow-hidden">
+                    <div className="mt-1 h-1 rounded-full bg-muted overflow-hidden">
                       <div 
                         className="h-full rounded-full bg-accent"
                         style={{ width: `${(milestone.progress.current / milestone.progress.target) * 100}%` }}
@@ -168,9 +174,9 @@ export function TrophyMenu({
                   )}
                 </div>
                 {milestone.isComplete ? (
-                  <Trophy className="w-5 h-5 text-gold" />
+                  <Trophy className="w-4 h-4 text-gold shrink-0" />
                 ) : (
-                  <Lock className="w-4 h-4 text-muted-foreground" />
+                  <Lock className="w-3 h-3 text-muted-foreground shrink-0" />
                 )}
               </div>
             ))}

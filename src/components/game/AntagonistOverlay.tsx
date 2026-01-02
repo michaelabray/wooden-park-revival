@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from 'react';
-import { X } from 'lucide-react';
 import { ANTAGONIST_DIALOGUE } from '@/lib/gameUtils';
 import { SlideToStudy } from './SlideToStudy';
 
@@ -38,35 +37,36 @@ export function AntagonistOverlay({ type, onSuccess, onFailure }: AntagonistOver
     : '/wooden-park-revival/assets/characters/sentinel.webp';
 
   return (
-    <div className={`overlay-antagonist ${isDismissing ? 'opacity-0' : ''} transition-opacity duration-200`}>
-      <div 
-        className="relative max-w-xl w-full mx-4 animate-bounce-in rounded-2xl overflow-hidden"
-        style={{
-          backgroundImage: `url('/wooden-park-revival/assets/ui/panel-bg.webp')`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-        }}
-      >
-        <div className="p-10 md:p-12">
+    <div className={`fixed inset-0 z-50 flex items-center justify-center bg-background/60 ${isDismissing ? 'opacity-0' : ''} transition-opacity duration-200`}>
+      <div className="relative w-[85vw] max-w-xl max-h-[80vh] overflow-hidden animate-bounce-in">
+        {/* Panel background image */}
+        <img 
+          src="/wooden-park-revival/assets/ui/panel-bg.webp"
+          alt=""
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+        
+        {/* Content overlay with padding inside the parchment */}
+        <div className="relative p-[12%]">
           {/* Timer */}
-          <div className={`absolute top-6 right-6 text-4xl md:text-5xl font-display ${
+          <div className={`absolute top-[8%] right-[8%] text-3xl md:text-4xl font-display ${
             timeLeft <= 2 ? 'text-destructive animate-shake' : 'text-warning'
           }`}>
             {timeLeft}s
           </div>
 
           {/* Character and Title */}
-          <div className="flex items-start gap-5 mb-6">
+          <div className="flex items-start gap-4 mb-4">
             <img 
               src={characterImage}
               alt={dialogue.title}
-              className="w-24 h-24 md:w-28 md:h-28 object-contain animate-bounce"
+              className="w-16 h-16 md:w-20 md:h-20 object-contain animate-bounce shrink-0"
             />
-            <div className="flex-1">
-              <h2 className="font-display text-3xl md:text-4xl text-foreground">
+            <div className="flex-1 min-w-0">
+              <h2 className="font-display text-xl md:text-2xl text-foreground">
                 {dialogue.title}
               </h2>
-              <p className="text-lg md:text-xl text-foreground/80 mt-2">
+              <p className="text-sm md:text-base text-foreground/80 mt-1">
                 {dialogue.line}
               </p>
             </div>
@@ -79,7 +79,7 @@ export function AntagonistOverlay({ type, onSuccess, onFailure }: AntagonistOver
           />
 
           {/* Penalty warning */}
-          <p className="text-sm md:text-base text-muted-foreground text-center mt-4">
+          <p className="text-xs md:text-sm text-muted-foreground text-center mt-3">
             {isSoggy 
               ? 'Fail: Production stops for 20 seconds' 
               : 'Fail: Lose 10% of your papers'}
