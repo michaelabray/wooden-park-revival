@@ -19,32 +19,32 @@ export function GraduationPanel({
   const canGraduate = splinterGain > 0;
 
   return (
-    <div className="bg-gold/10 rounded-xl p-5 border border-gold/30">
-      <div className="flex items-center gap-3 mb-4">
-        <Sparkles className="w-8 h-8 text-gold" />
-        <h3 className="font-display text-2xl text-gold">Graduation</h3>
+    <div className="bg-gold/10 rounded-lg p-3 border border-gold/30">
+      <div className="flex items-center gap-2 mb-2">
+        <Sparkles className="w-5 h-5 text-gold" />
+        <h3 className="font-display text-lg text-gold">Graduation</h3>
       </div>
 
-      <div className="flex items-center justify-between text-base mb-4">
+      <div className="flex items-center justify-between text-sm mb-2">
         <span className="text-muted-foreground">Lifetime: {formatPapers(totalPapersLifetime)}</span>
-        <span className="text-gold font-semibold text-lg">✦ {currentSplinters}</span>
+        <span className="text-gold font-semibold">✦ {currentSplinters}</span>
       </div>
 
       {canGraduate ? (
-        <div className="space-y-3">
-          <div className="flex items-center justify-center gap-2 text-success text-base">
+        <div className="space-y-2">
+          <div className="flex items-center justify-center gap-1 text-success text-sm">
             <span className="font-medium">+{splinterGain} Splinters</span>
-            <ArrowRight className="w-5 h-5" />
+            <ArrowRight className="w-4 h-4" />
           </div>
           <button
             onClick={onGraduate}
-            className="w-full bg-gold text-gold-foreground py-3 rounded-xl font-display text-lg tracking-wide hover:opacity-90 transition-opacity"
+            className="w-full bg-gold text-gold-foreground py-2 rounded-lg font-display text-sm tracking-wide hover:opacity-90 transition-opacity"
           >
             GRADUATE!
           </button>
         </div>
       ) : (
-        <p className="text-sm text-center text-muted-foreground">
+        <p className="text-xs text-center text-muted-foreground">
           Earn more papers to graduate
         </p>
       )}

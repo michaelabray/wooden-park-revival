@@ -5,15 +5,7 @@ interface ParallaxBackgroundProps {
   unlockedBlueprints: string[];
 }
 
-// Blueprint positions - organized in a row at the bottom of the screen
-const BLUEPRINT_POSITIONS: Record<string, { x: string; y: string; scale: number }> = {
-  steps: { x: '10%', y: '78%', scale: 0.7 },
-  slide: { x: '30%', y: '76%', scale: 0.75 },
-  swing: { x: '50%', y: '77%', scale: 0.7 },
-  walls: { x: '70%', y: '78%', scale: 0.65 },
-  statue: { x: '90%', y: '75%', scale: 0.8 },
-};
-
+// Blueprint images for the 2x2 + center layout in the right column
 const BLUEPRINT_IMAGES: Record<string, string> = {
   steps: '/wooden-park-revival/assets/blueprints/steps.webp',
   slide: '/wooden-park-revival/assets/blueprints/slide.webp',
@@ -24,6 +16,7 @@ const BLUEPRINT_IMAGES: Record<string, string> = {
 
 export function ParallaxBackground({ unlockedBlueprints }: ParallaxBackgroundProps) {
   const [skyOffset, setSkyOffset] = useState(0);
+  const [direction, setDirection] = useState(1); // 1 = right-to-left, -1 = left-to-right
 
   useEffect(() => {
     let animationFrame: number;
@@ -34,25 +27,38 @@ export function ParallaxBackground({ unlockedBlueprints }: ParallaxBackgroundPro
       const delta = time - lastTime;
       lastTime = time;
 
-      // Slow parallax movement
-      setSkyOffset(prev => (prev + delta * 0.002) % 200);
+      // Ping-pong parallax movement
+      setSkyOffset(prev => {
+        const newOffset = prev + delta * 0.005 * direction;
+        
+        // Reverse direction at boundaries
+        if (newOffset >= 100) {
+          setDirection(-1);
+          return 100;
+        } else if (newOffset <= 0) {
+          setDirection(1);
+          return 0;
+        }
+        
+        return newOffset;
+      });
 
       animationFrame = requestAnimationFrame(animate);
     };
 
     animationFrame = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(animationFrame);
-  }, []);
+  }, [direction]);
 
   return (
     <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
-      {/* Sky layer - moves slowly with smooth parallax */}
+      {/* Sky layer - moves with ping-pong parallax */}
       <div
         className="absolute inset-0"
         style={{
           backgroundImage: `url('/wooden-park-revival/assets/bg/bg-sky.webp')`,
           backgroundSize: '200% 100%',
-          backgroundPosition: `${skyOffset % 100}% 0`,
+          backgroundPosition: `${skyOffset}% 0`,
           backgroundRepeat: 'repeat-x',
         }}
       />
@@ -66,32 +72,59 @@ export function ParallaxBackground({ unlockedBlueprints }: ParallaxBackgroundPro
         }}
       />
 
-      {/* Unlocked blueprints rendered on top of world */}
-      {unlockedBlueprints.map(blueprintId => {
-        const position = BLUEPRINT_POSITIONS[blueprintId];
-        const imageSrc = BLUEPRINT_IMAGES[blueprintId];
-        
-        if (!position || !imageSrc) return null;
-
-        return (
-          <img
-            key={blueprintId}
-            src={imageSrc}
-            alt={BLUEPRINTS.find(b => b.id === blueprintId)?.name || blueprintId}
-            className="absolute animate-fade-in drop-shadow-2xl"
-            style={{
-              left: position.x,
-              top: position.y,
-              transform: `translate(-50%, -50%) scale(${position.scale})`,
-              maxWidth: '120px',
-              zIndex: 5,
-            }}
-          />
-        );
-      })}
-
       {/* Overlay gradient for readability */}
       <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-transparent" />
+    </div>
+  );
+}
+
+// Separate component for the blueprint grid in the right column
+export function BlueprintDisplay({ unlockedBlueprints }: { unlockedBlueprints: string[] }) {
+  const gridBlueprints = ['steps', 'slide', 'swing', 'walls'];
+  
+  return (
+    <div className="relative w-full h-full flex items-center justify-center">
+      {/* 2x2 Grid for first 4 blueprints */}
+      <div className="grid grid-cols-2 gap-2 w-full max-w-full">
+        {gridBlueprints.map(id => {
+          const isUnlocked = unlockedBlueprints.includes(id);
+          const imageSrc = BLUEPRINT_IMAGES[id];
+          const blueprint = BLUEPRINTS.find(b => b.id === id);
+          
+          return (
+            <div 
+              key={id}
+              className={`aspect-square flex items-center justify-center rounded-lg transition-all duration-300 ${
+                isUnlocked ? 'bg-gold/10' : 'bg-muted/30'
+              }`}
+            >
+              {isUnlocked && imageSrc ? (
+                <img
+                  src={imageSrc}
+                  alt={blueprint?.name || id}
+                  className="w-[45%] h-auto object-contain drop-shadow-lg animate-fade-in"
+                />
+              ) : (
+                <div className="w-[45%] aspect-square bg-muted/50 rounded-lg flex items-center justify-center">
+                  <span className="text-muted-foreground text-[clamp(0.5rem,1vw,0.75rem)]">?</span>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Founder statue - larger, overlays center of grid */}
+      {unlockedBlueprints.includes('statue') && (
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <img
+            src={BLUEPRINT_IMAGES.statue}
+            alt="Founder Statue"
+            className="w-[50%] h-auto object-contain drop-shadow-2xl animate-bounce-in z-10"
+            style={{ filter: 'drop-shadow(0 0 20px hsl(var(--gold) / 0.6))' }}
+          />
+        </div>
+      )}
     </div>
   );
 }

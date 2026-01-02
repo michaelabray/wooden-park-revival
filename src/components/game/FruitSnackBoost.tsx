@@ -47,49 +47,40 @@ export function FruitSnackBoost({
   }, [isActive, endTime]);
 
   return (
-    <div className={`bg-secondary/60 backdrop-blur-sm rounded-2xl p-6 transition-all duration-300 ${isActive ? 'ring-4 ring-warning/50' : ''}`}>
-      <div className="flex items-center gap-5">
+    <div className={`w-[80vw] max-w-xl mx-auto bg-secondary/60 backdrop-blur-sm rounded-full px-4 py-2 transition-all duration-300 ${isActive ? 'ring-2 ring-warning/50' : ''}`}>
+      <div className="flex items-center gap-3">
+        {/* Icon */}
         <img 
-          src="./assets/icons/fruit-snack.webp" 
+          src="/wooden-park-revival/assets/icons/fruit-snack.webp" 
           alt="Fruit Snack"
-          className={`w-16 h-16 md:w-20 md:h-20 object-contain ${isActive ? 'animate-bounce' : ''}`}
+          className={`w-[6vw] max-w-[40px] min-w-[24px] object-contain shrink-0 ${isActive ? 'animate-bounce' : ''}`}
         />
-        <div className="flex-1">
+
+        {/* Status/Action - Expands to fill */}
+        <div className="flex-1 min-w-0">
           {isActive ? (
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-xl md:text-2xl text-warning font-semibold flex items-center gap-2">
-                  <Zap className="w-6 h-6 md:w-8 md:h-8" />
-                  2x ACTIVE
-                </span>
-                <span className="text-xl md:text-2xl font-medium text-foreground">{timeLeft}s</span>
-              </div>
-              <div className="h-4 md:h-6 rounded-full bg-muted overflow-hidden">
+            <div className="flex items-center gap-2">
+              <Zap className="w-4 h-4 text-warning shrink-0" />
+              <span className="text-[clamp(0.6rem,1.5vw,0.875rem)] text-warning font-semibold whitespace-nowrap">2x</span>
+              <div className="flex-1 h-2 rounded-full bg-muted overflow-hidden">
                 <div 
                   className="h-full bg-warning transition-all"
                   style={{ width: `${(timeLeft / 30) * 100}%` }}
                 />
               </div>
+              <span className="text-[clamp(0.6rem,1.5vw,0.875rem)] font-medium text-foreground whitespace-nowrap">{timeLeft}s</span>
             </div>
           ) : (
             <button
               onClick={onActivate}
               disabled={!canAfford}
-              className={`w-full py-4 px-6 rounded-xl font-semibold transition-all relative overflow-hidden ${
+              className={`w-full py-1 px-3 rounded-full font-semibold transition-all text-[clamp(0.6rem,1.5vw,0.875rem)] ${
                 canAfford 
-                  ? 'hover:scale-105 active:scale-95' 
-                  : 'opacity-50 cursor-not-allowed'
+                  ? 'bg-gold/20 hover:bg-gold/30 text-gold' 
+                  : 'bg-muted/50 text-muted-foreground cursor-not-allowed'
               }`}
             >
-              <img 
-                src="./assets/ui/button.webp" 
-                alt=""
-                className="absolute inset-0 w-full h-full object-cover rounded-xl"
-                style={{ filter: !canAfford ? 'grayscale(50%)' : 'none' }}
-              />
-              <span className="relative z-10 text-foreground text-xl md:text-2xl">
-                Boost ({FRUIT_SNACK_COST})
-              </span>
+              Boost ({FRUIT_SNACK_COST})
             </button>
           )}
         </div>
@@ -98,19 +89,19 @@ export function FruitSnackBoost({
         {autoBoostPurchased ? (
           <button
             onClick={onToggleAutoBoost}
-            className="p-3 rounded-xl bg-background/50 hover:bg-background/70 transition-colors"
+            className="p-1 rounded-lg hover:bg-background/30 transition-colors shrink-0"
           >
             {autoBoostEnabled ? (
-              <ToggleRight className="w-10 h-10 md:w-12 md:h-12 text-success" />
+              <ToggleRight className="w-[4vw] max-w-[24px] min-w-[16px] h-auto text-success" />
             ) : (
-              <ToggleLeft className="w-10 h-10 md:w-12 md:h-12 text-muted-foreground" />
+              <ToggleLeft className="w-[4vw] max-w-[24px] min-w-[16px] h-auto text-muted-foreground" />
             )}
           </button>
         ) : (
           <button
             onClick={onPurchaseAutoBoost}
             disabled={!canAffordAutoBoost}
-            className={`px-5 py-3 rounded-xl text-lg md:text-xl transition-all ${
+            className={`px-2 py-1 rounded-full text-[clamp(0.5rem,1.2vw,0.75rem)] whitespace-nowrap transition-all shrink-0 ${
               canAffordAutoBoost
                 ? 'bg-gold/20 hover:bg-gold/30 text-gold'
                 : 'bg-muted/50 text-muted-foreground cursor-not-allowed'
