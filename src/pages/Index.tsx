@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useGameState } from '@/hooks/useGameState';
+import { useAudioManager } from '@/hooks/useAudioManager';
 import { getSplinterMultiplier } from '@/lib/gameUtils';
 import { GameHeader } from '@/components/game/GameHeader';
 import { PaperClicker } from '@/components/game/PaperClicker';
@@ -36,11 +37,14 @@ export default function Index() {
     applyAntagonistPenalty,
     incrementAntagonistsDefeated,
     triggerCriticalStudy,
+    purchasePrestige,
     addPapers,
     addSplinters,
     wipeSave,
     markVictorySeen,
   } = useGameState();
+
+  const audio = useAudioManager();
 
   const [showSplash, setShowSplash] = useState(true);
   const [showDevMenu, setShowDevMenu] = useState(false);
@@ -51,15 +55,24 @@ export default function Index() {
   const [showVictory, setShowVictory] = useState(false);
   const [showShop, setShowShop] = useState(false);
   const [lastAntagonistTime, setLastAntagonistTime] = useState(Date.now());
+  const [showTutorial, setShowTutorial] = useState(state.totalPapersLifetime === 0);
+  const [showGoalBanner, setShowGoalBanner] = useState(!state.unlockedBlueprints.includes('steps'));
 
   // Check for victory condition
   useEffect(() => {
     if (state.unlockedBlueprints.includes('statue') && !state.hasSeenVictory && !showVictory) {
       setShowVictory(true);
+      audio.playSFX('victory');
     }
-  }, [state.unlockedBlueprints, state.hasSeenVictory, showVictory]);
+  }, [state.unlockedBlueprints, state.hasSeenVictory, showVictory, audio]);
 
-  // Random antagonist spawns (60-90 seconds) - reduced by 30% with Tier 2 prestige
+  // Hide goal banner when first blueprint is purchased
+  useEffect(() => {
+    if (state.unlockedBlueprints.includes('steps')) {
+      setShowGoalBanner(false);
+    }
+  }, [state.unlockedBlueprints]);
+
   useEffect(() => {
     if (showSplash) return;
     
@@ -83,12 +96,13 @@ export default function Index() {
         setAntagonist(Math.random() > 0.5 ? 'soggy' : 'sentinel');
         setAntagonistStartTime(Date.now());
         setLastAntagonistTime(now);
+        audio.playSFX('antagonist');
       }
     };
 
     const interval = setInterval(checkAntagonist, 5000);
     return () => clearInterval(interval);
-  }, [antagonist, state.antagonistPaused, state.unlockedBlueprints, showSplash, lastAntagonistTime, state.prestigeTier]);
+  }, [antagonist, state.antagonistPaused, state.unlockedBlueprints, showSplash, lastAntagonistTime, state.prestigeTier, audio]);
 
   const handleAntagonistSuccess = useCallback((completionTime: number) => {
     incrementAntagonistsDefeated();
@@ -112,6 +126,26 @@ export default function Index() {
   const clickPower = getClickPower();
   const splinterMultiplier = getSplinterMultiplier(state.goldenSplinters);
 
+  // Wrap handleClick to play SFX
+  const handleClickWithAudio = useCallback(() => {
+    audio.initialize(); // Initialize on first user interaction
+    audio.playSFX('click');
+    return handleClick();
+  }, [handleClick, audio]);
+
+  // Wrap buy functions to play SFX
+  const handleBuyUnit = useCallback((unitId: string) => {
+    const success = buyUnit(unitId);
+    if (success) audio.playSFX('buy');
+    return success;
+  }, [buyUnit, audio]);
+
+  const handleBuyBlueprint = useCallback((blueprintId: string, cost: number) => {
+    const success = buyBlueprint(blueprintId, cost);
+    if (success) audio.playSFX('buy');
+    return success;
+  }, [buyBlueprint, audio]);
+
   // Stable callback to prevent the splash screen from resetting every second
   const handleSplashComplete = useCallback(() => {
     setShowSplash(false);
@@ -126,8 +160,8 @@ export default function Index() {
       {/* Parallax Background */}
       <ParallaxBackground unlockedBlueprints={state.unlockedBlueprints} />
 
-      {/* Main layout container - 100vh, no scrolling, pb-16 for ticker */}
-      <div className="relative z-10 h-full w-full flex flex-col pb-16">
+      {/* Main layout container - 100vh, no scrolling, pb-20 for ticker */}
+      <div className="relative z-10 h-full w-full flex flex-col pb-20">
         {/* Top Row: HUD */}
         <div className="px-2 md:px-4">
           <GameHeader
@@ -138,6 +172,17 @@ export default function Index() {
             onTrophyClick={() => setShowTrophyMenu(true)}
           />
         </div>
+
+        {/* Goal Banner - Shown until first blueprint purchased */}
+        {showGoalBanner && (
+          <div className="px-2 md:px-4 py-1">
+            <div className="bg-accent/20 border border-accent/30 rounded-lg px-4 py-2 text-center animate-fade-in">
+              <span className="text-accent font-semibold text-sm">
+                🎯 Current Goal: Unlock "The Steps" Blueprint
+              </span>
+            </div>
+          </div>
+        )}
 
         {/* Main Body: 3-column grid (desktop) or stacked (mobile) */}
         <div className="flex-1 grid grid-cols-1 md:grid-cols-[25%_50%_25%] gap-2 px-2 md:px-4 py-2 min-h-0">
@@ -162,8 +207,10 @@ export default function Index() {
               currentPapers={state.currentPapers}
               passiveIncome={passiveIncome}
               clickPower={clickPower}
-              onClick={handleClick}
+              onClick={handleClickWithAudio}
               criticalStudyActive={state.criticalStudyActive}
+              showTutorial={showTutorial}
+              onTutorialDismiss={() => setShowTutorial(false)}
             />
           </div>
 
@@ -206,7 +253,7 @@ export default function Index() {
             </DialogTitle>
           </DialogHeader>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-            <UnitShop currentPapers={state.currentPapers} units={state.units} onBuy={buyUnit} />
+            <UnitShop currentPapers={state.currentPapers} units={state.units} onBuy={handleBuyUnit} />
             <div className="space-y-4">
               <GraduationPanel
                 currentPapers={state.currentPapers}
@@ -217,7 +264,7 @@ export default function Index() {
               <BlueprintShop
                 goldenSplinters={state.goldenSplinters}
                 unlockedBlueprints={state.unlockedBlueprints}
-                onBuy={buyBlueprint}
+                onBuy={handleBuyBlueprint}
               />
             </div>
           </div>
@@ -237,7 +284,12 @@ export default function Index() {
               Settings
             </DialogTitle>
           </DialogHeader>
-          <SettingsPanel />
+          <SettingsPanel 
+            volume={audio.volume}
+            isMuted={audio.isMuted}
+            onVolumeChange={audio.setVolume}
+            onToggleMute={audio.toggleMute}
+          />
         </DialogContent>
       </Dialog>
 
@@ -270,7 +322,8 @@ export default function Index() {
         goldenSplinters={state.goldenSplinters}
         prestigeTier={state.prestigeTier}
         onPurchasePrestige={(tier, cost) => {
-          // Purchase prestige handled via useGameState
+          const success = purchasePrestige(tier, cost);
+          if (success) audio.playSFX('buy');
         }}
       />
 

@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { formatPapers } from '@/lib/gameUtils';
 
 interface Particle {
@@ -23,24 +23,62 @@ interface PaperClickerProps {
   clickPower: number;
   onClick: () => number;
   criticalStudyActive?: boolean;
+  showTutorial?: boolean;
+  onTutorialDismiss?: () => void;
 }
 
-export function PaperClicker({ currentPapers, passiveIncome, clickPower, onClick, criticalStudyActive }: PaperClickerProps) {
+export function PaperClicker({ 
+  currentPapers, 
+  passiveIncome, 
+  clickPower, 
+  onClick, 
+  criticalStudyActive,
+  showTutorial,
+  onTutorialDismiss,
+}: PaperClickerProps) {
   const [particles, setParticles] = useState<Particle[]>([]);
   const [splinterParticles, setSplinterParticles] = useState<SplinterParticle[]>([]);
   const [isClicking, setIsClicking] = useState(false);
   const [tiltAngle, setTiltAngle] = useState(0);
+  const buttonRef = useRef<HTMLButtonElement>(null);
 
-  const handleClick = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
+  // Keyboard support: Spacebar triggers click
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.code === 'Space' && !e.repeat) {
+        e.preventDefault();
+        if (buttonRef.current) {
+          // Simulate click at center of button
+          const rect = buttonRef.current.getBoundingClientRect();
+          const fakeEvent = {
+            clientX: rect.left + rect.width / 2,
+            clientY: rect.top + rect.height / 2,
+            currentTarget: buttonRef.current,
+          } as unknown as React.MouseEvent<HTMLButtonElement>;
+          handleClick(fakeEvent);
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  const handleClick = useCallback((e: React.MouseEvent<HTMLButtonElement> | { clientX: number; clientY: number; currentTarget: HTMLButtonElement }) => {
     const value = onClick();
+    
+    // Dismiss tutorial on first click
+    if (showTutorial && onTutorialDismiss) {
+      onTutorialDismiss();
+    }
     
     // Rapid tilt and scale animation
     setIsClicking(true);
-    setTiltAngle((Math.random() - 0.5) * 20); // Random tilt between -10 and 10 degrees
+    setTiltAngle((Math.random() - 0.5) * 20);
     setTimeout(() => {
       setIsClicking(false);
       setTiltAngle(0);
-    }, 50); // 0.05s duration
+    }, 50);
 
     // Create particle at click location with horizontal jitter
     const rect = e.currentTarget.getBoundingClientRect();
@@ -58,14 +96,14 @@ export function PaperClicker({ currentPapers, passiveIncome, clickPower, onClick
 
     setParticles(prev => [...prev, newParticle]);
 
-    // Create 3-5 splinter particles
+    // Create 3-5 splinter particles using splinter.webp
     const splinterCount = Math.floor(Math.random() * 3) + 3;
     const newSplinters: SplinterParticle[] = [];
     for (let i = 0; i < splinterCount; i++) {
       newSplinters.push({
         id: Date.now() + Math.random() + i,
         x: rect.width / 2,
-        y: rect.height * 0.3, // Near pencil tip
+        y: rect.height * 0.3,
         angle: Math.random() * 360,
         distance: 30 + Math.random() * 40,
       });
@@ -80,7 +118,7 @@ export function PaperClicker({ currentPapers, passiveIncome, clickPower, onClick
     setTimeout(() => {
       setSplinterParticles(prev => prev.filter(p => !newSplinters.find(ns => ns.id === p.id)));
     }, 500);
-  }, [onClick]);
+  }, [onClick, showTutorial, onTutorialDismiss]);
 
   return (
     <div className="flex flex-col items-center justify-center relative">
@@ -113,63 +151,88 @@ export function PaperClicker({ currentPapers, passiveIncome, clickPower, onClick
       </div>
 
       {/* Pencil Click Button - The Hero (Center) */}
-      <button
-        onClick={handleClick}
-        className={`relative w-[30vw] max-w-[200px] min-w-[100px] aspect-square transition-all duration-[50ms] ${
-          criticalStudyActive ? 'animate-pulse-glow' : ''
-        }`}
-        style={{
-          transform: isClicking 
-            ? `scale(0.92) rotate(${tiltAngle}deg)` 
-            : 'scale(1) rotate(0deg)',
-        }}
-      >
-        <img 
-          src="/wooden-park-revival/assets/hero/pencil.webp" 
-          alt="Click to write papers"
-          className="w-full h-full object-contain drop-shadow-2xl"
+      <div className="relative">
+        <button
+          ref={buttonRef}
+          onClick={handleClick}
+          className={`relative w-[30vw] max-w-[200px] min-w-[100px] aspect-square transition-all duration-[50ms] ${
+            criticalStudyActive ? 'animate-pulse-glow' : ''
+          }`}
           style={{
-            filter: criticalStudyActive 
-              ? 'drop-shadow(0 0 40px hsl(var(--warning) / 0.8))' 
-              : 'drop-shadow(0 0 30px hsl(var(--gold) / 0.6))',
+            transform: isClicking 
+              ? `scale(0.92) rotate(${tiltAngle}deg)` 
+              : 'scale(1) rotate(0deg)',
           }}
-        />
-        
-        {/* Floating +1 Particles */}
-        {particles.map(particle => (
-          <div
-            key={particle.id}
-            className="absolute pointer-events-none z-20"
+        >
+          <img 
+            src="/wooden-park-revival/assets/hero/pencil.webp" 
+            alt="Click to write papers"
+            className="w-full h-full object-contain drop-shadow-2xl"
             style={{
-              left: particle.x,
-              top: particle.y,
-              animation: 'float-up-jitter 1s ease-out forwards',
-              '--jitter-x': `${particle.offsetX}px`,
-            } as React.CSSProperties}
-          >
-            <img 
-              src="/wooden-park-revival/assets/icons/click-plus-one.webp" 
-              alt="+1"
-              className="w-8 h-8 object-contain"
-            />
-          </div>
-        ))}
-
-        {/* Splinter Particle Bursts */}
-        {splinterParticles.map(particle => (
-          <div
-            key={particle.id}
-            className="absolute pointer-events-none z-20 w-2 h-2 bg-gold rounded-full"
-            style={{
-              left: particle.x,
-              top: particle.y,
-              animation: 'splinter-burst 0.5s ease-out forwards',
-              '--angle': `${particle.angle}deg`,
-              '--distance': `${particle.distance}px`,
-            } as React.CSSProperties}
+              filter: criticalStudyActive 
+                ? 'drop-shadow(0 0 40px hsl(var(--warning) / 0.8))' 
+                : 'drop-shadow(0 0 30px hsl(var(--gold) / 0.6))',
+            }}
           />
-        ))}
-      </button>
+          
+          {/* Floating +1 Particles */}
+          {particles.map(particle => (
+            <div
+              key={particle.id}
+              className="absolute pointer-events-none z-20"
+              style={{
+                left: particle.x,
+                top: particle.y,
+                animation: 'float-up-jitter 1s ease-out forwards',
+                '--jitter-x': `${particle.offsetX}px`,
+              } as React.CSSProperties}
+            >
+              <img 
+                src="/wooden-park-revival/assets/icons/click-plus-one.webp" 
+                alt="+1"
+                className="w-8 h-8 object-contain"
+              />
+            </div>
+          ))}
+
+          {/* Splinter Particle Bursts - Using splinter.webp image */}
+          {splinterParticles.map(particle => (
+            <div
+              key={particle.id}
+              className="absolute pointer-events-none z-20"
+              style={{
+                left: particle.x,
+                top: particle.y,
+                animation: 'splinter-burst 0.5s ease-out forwards',
+                '--angle': `${particle.angle}deg`,
+                '--distance': `${particle.distance}px`,
+              } as React.CSSProperties}
+            >
+              <img 
+                src="/wooden-park-revival/assets/icons/splinter.webp" 
+                alt=""
+                className="w-3 h-3 object-contain"
+              />
+            </div>
+          ))}
+        </button>
+
+        {/* Tutorial Hand - Pulsing over the pencil */}
+        {showTutorial && (
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-30">
+            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/4 animate-tutorial-pulse">
+              <img 
+                src="/wooden-park-revival/assets/ui/tutorial-hand.webp" 
+                alt="Click here!"
+                className="w-16 h-16 md:w-20 md:h-20 object-contain drop-shadow-lg"
+              />
+            </div>
+            <div className="absolute -bottom-16 left-1/2 -translate-x-1/2 bg-gold/90 text-background px-3 py-1 rounded-full text-sm font-semibold whitespace-nowrap animate-fade-in">
+              Click to write A+ papers!
+            </div>
+          </div>
+        )}
+      </div>
 
       {/* Stats - Side by side to save vertical space */}
       <div className="mt-4 flex items-center gap-4">
