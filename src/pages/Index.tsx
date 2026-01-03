@@ -1,7 +1,8 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useGameState } from '@/hooks/useGameState';
 import { useAudioManager } from '@/hooks/useAudioManager';
 import { getSplinterMultiplier } from '@/lib/gameUtils';
+import { getCurrentGoal, getNextGoal, getGoalProgress, GoalCheckState } from '@/lib/goalSystem';
 import { GameHeader } from '@/components/game/GameHeader';
 import { PaperClicker } from '@/components/game/PaperClicker';
 import { UnitShop } from '@/components/game/UnitShop';
@@ -17,8 +18,10 @@ import { SplashScreen } from '@/components/game/SplashScreen';
 import { ParallaxBackground, BlueprintDisplay } from '@/components/game/ParallaxBackground';
 import { TrophyMenu } from '@/components/game/TrophyMenu';
 import { SettingsPanel } from '@/components/game/SettingsPanel';
+import { GoalBanner } from '@/components/game/GoalBanner';
+import { VictoryPathBox } from '@/components/game/VictoryPathBox';
+import { TutorialHand } from '@/components/game/TutorialHand';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { X } from 'lucide-react';
 
 export default function Index() {
   const {
@@ -55,8 +58,21 @@ export default function Index() {
   const [showVictory, setShowVictory] = useState(false);
   const [showShop, setShowShop] = useState(false);
   const [lastAntagonistTime, setLastAntagonistTime] = useState(Date.now());
-  const [showTutorial, setShowTutorial] = useState(state.totalPapersLifetime === 0);
-  const [showGoalBanner, setShowGoalBanner] = useState(!state.unlockedBlueprints.includes('steps'));
+
+  // Goal system state
+  const goalCheckState: GoalCheckState = useMemo(() => ({
+    totalPapersLifetime: state.totalPapersLifetime,
+    currentPapers: state.currentPapers,
+    units: state.units,
+    goldenSplinters: state.goldenSplinters,
+    totalSplintersEarned: state.totalSplintersEarned,
+    unlockedBlueprints: state.unlockedBlueprints,
+    hasGraduated: state.totalSplintersEarned > 0,
+  }), [state]);
+
+  const currentGoal = useMemo(() => getCurrentGoal(goalCheckState), [goalCheckState]);
+  const nextGoal = useMemo(() => getNextGoal(goalCheckState), [goalCheckState]);
+  const goalProgress = useMemo(() => getGoalProgress(goalCheckState), [goalCheckState]);
 
   // Check for victory condition
   useEffect(() => {
@@ -65,13 +81,6 @@ export default function Index() {
       audio.playSFX('victory');
     }
   }, [state.unlockedBlueprints, state.hasSeenVictory, showVictory, audio]);
-
-  // Hide goal banner when first blueprint is purchased
-  useEffect(() => {
-    if (state.unlockedBlueprints.includes('steps')) {
-      setShowGoalBanner(false);
-    }
-  }, [state.unlockedBlueprints]);
 
   useEffect(() => {
     if (showSplash) return;
@@ -173,32 +182,34 @@ export default function Index() {
           />
         </div>
 
-        {/* Goal Banner - Shown until first blueprint purchased */}
-        {showGoalBanner && (
-          <div className="px-2 md:px-4 py-1">
-            <div className="bg-accent/20 border border-accent/30 rounded-lg px-4 py-2 text-center animate-fade-in">
-              <span className="text-accent font-semibold text-sm">
-                🎯 Current Goal: Unlock "The Steps" Blueprint
-              </span>
-            </div>
-          </div>
-        )}
+        {/* Goal Banner - High contrast dark charcoal with gold */}
+        <GoalBanner currentGoal={currentGoal} nextGoal={nextGoal} progress={goalProgress} />
 
         {/* Main Body: 3-column grid (desktop) or stacked (mobile) */}
         <div className="flex-1 grid grid-cols-1 md:grid-cols-[25%_50%_25%] gap-2 px-2 md:px-4 py-2 min-h-0">
           {/* Left Column: Cart button to toggle shop */}
           <div className="flex items-start justify-center md:items-center md:justify-center order-3 md:order-1">
-            <button
-              onClick={() => setShowShop(true)}
-              className="transition-transform hover:scale-110 active:scale-95"
-              title="Shop"
-            >
-              <img 
-                src="/wooden-park-revival/assets/ui/cart.webp" 
-                alt="Shop"
-                className="w-[20vw] md:w-[40%] max-w-[120px] min-w-[60px] object-contain drop-shadow-lg"
+            <div className="relative">
+              <button
+                onClick={() => setShowShop(true)}
+                className="transition-transform hover:scale-110 active:scale-95"
+                title="Shop"
+              >
+                <img 
+                  src="/wooden-park-revival/assets/ui/cart.webp" 
+                  alt="Shop"
+                  className="w-[20vw] md:w-[40%] max-w-[120px] min-w-[60px] object-contain drop-shadow-lg"
+                />
+              </button>
+              {/* Tutorial Hand for Goal 2 */}
+              <TutorialHand
+                currentGoal={currentGoal}
+                totalPapersLifetime={state.totalPapersLifetime}
+                currentPapers={state.currentPapers}
+                isShopOpen={showShop}
+                targetRef="cart"
               />
-            </button>
+            </div>
           </div>
 
           {/* Middle Column: Main clicker area */}
@@ -209,21 +220,24 @@ export default function Index() {
               clickPower={clickPower}
               onClick={handleClickWithAudio}
               criticalStudyActive={state.criticalStudyActive}
-              showTutorial={showTutorial}
-              onTutorialDismiss={() => setShowTutorial(false)}
+              showTutorial={currentGoal?.id === 1 && state.totalPapersLifetime < 15}
+              onTutorialDismiss={() => {}}
             />
           </div>
 
-          {/* Right Column: Blueprints grid */}
-          <div className="hidden md:flex items-center justify-center order-2 md:order-3 p-2">
+          {/* Right Column: Blueprints grid + Victory Path */}
+          <div className="hidden md:flex flex-col items-center justify-center order-2 md:order-3 p-2 gap-3">
             <div className="w-full max-w-[180px]">
               <BlueprintDisplay unlockedBlueprints={state.unlockedBlueprints} />
+            </div>
+            <div className="w-full max-w-[180px]">
+              <VictoryPathBox unlockedCount={state.unlockedBlueprints.length} />
             </div>
           </div>
         </div>
 
         {/* Bottom: Fruit Snack Boost - horizontal bar */}
-        <div className="px-2 md:px-4 py-2 flex justify-center">
+        <div className="px-2 md:px-4 py-2 flex justify-center relative">
           <FruitSnackBoost
             currentPapers={state.currentPapers}
             isActive={state.fruitSnackActive}
@@ -236,6 +250,19 @@ export default function Index() {
             criticalStudyActive={state.criticalStudyActive}
             criticalStudyEndTime={state.criticalStudyEndTime}
           />
+          {/* Tutorial Hand for Goal 3 */}
+          {currentGoal?.id === 3 && state.currentPapers >= 50 && !state.fruitSnackActive && (
+            <div className="absolute -top-2 left-1/2 -translate-x-1/2 -translate-y-full animate-tutorial-pulse z-30 pointer-events-none">
+              <img 
+                src="/wooden-park-revival/assets/ui/tutorial-hand.webp" 
+                alt="Click here!"
+                className="w-10 h-10 md:w-12 md:h-12 object-contain drop-shadow-lg rotate-180"
+              />
+              <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-gold/90 text-background px-2 py-0.5 rounded-full text-xs font-semibold whitespace-nowrap">
+                Activate Boost!
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -253,7 +280,12 @@ export default function Index() {
             </DialogTitle>
           </DialogHeader>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-            <UnitShop currentPapers={state.currentPapers} units={state.units} onBuy={handleBuyUnit} />
+            <UnitShop 
+              currentPapers={state.currentPapers} 
+              units={state.units} 
+              onBuy={handleBuyUnit}
+              showDaydreamerTutorial={currentGoal?.id === 2 && showShop}
+            />
             <div className="space-y-4">
               <GraduationPanel
                 currentPapers={state.currentPapers}
@@ -285,10 +317,14 @@ export default function Index() {
             </DialogTitle>
           </DialogHeader>
           <SettingsPanel 
-            volume={audio.volume}
-            isMuted={audio.isMuted}
-            onVolumeChange={audio.setVolume}
-            onToggleMute={audio.toggleMute}
+            musicEnabled={audio.musicEnabled}
+            sfxEnabled={audio.sfxEnabled}
+            musicVolume={audio.musicVolume}
+            sfxVolume={audio.sfxVolume}
+            onToggleMusic={audio.toggleMusic}
+            onToggleSfx={audio.toggleSfx}
+            onMusicVolumeChange={audio.setMusicVolume}
+            onSfxVolumeChange={audio.setSfxVolume}
           />
         </DialogContent>
       </Dialog>
@@ -300,7 +336,7 @@ export default function Index() {
       )}
 
       {antagonist && (
-        <AntagonistOverlay 
+        <AntagonistOverlay
           type={antagonist} 
           onSuccess={handleAntagonistSuccess} 
           onFailure={handleAntagonistFailure}
