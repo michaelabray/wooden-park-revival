@@ -39,7 +39,7 @@ export const UNITS: UnitType[] = [
     name: 'Daydreamer',
     description: 'Gazes out the window, occasionally scribbles notes',
     baseCost: 15,
-    baseYield: 0.0575, // 0.05 * 1.15 = 0.0575 (15% buff)
+    baseYield: 0.10, // Updated from 0.0575 to 0.10/s
     icon: 'Cloud',
     image: '/wooden-park-revival/assets/units/daydreamer.webp',
   },
@@ -48,7 +48,7 @@ export const UNITS: UnitType[] = [
     name: 'Overachiever',
     description: 'Hand always raised, extra credit obsessed',
     baseCost: 100,
-    baseYield: 0.345, // 0.30 * 1.15 = 0.345 (15% buff)
+    baseYield: 0.50, // Updated from 0.345 to 0.50/s
     icon: 'Star',
     image: '/wooden-park-revival/assets/units/overachiever.webp',
   },

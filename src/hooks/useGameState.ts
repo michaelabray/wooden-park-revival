@@ -23,6 +23,7 @@ export interface GameState {
   // Persistence for goals/tutorial
   highestGoalReached: number;
   hasSeenIntro: boolean;
+  hasUsedFruitSnack: boolean;
 }
 
 const INITIAL_STATE: GameState = {
@@ -46,6 +47,7 @@ const INITIAL_STATE: GameState = {
   criticalStudyEndTime: 0,
   highestGoalReached: 0,
   hasSeenIntro: false,
+  hasUsedFruitSnack: false,
 };
 
 const STORAGE_KEY = 'bk-academy-save';
@@ -71,6 +73,7 @@ export function useGameState() {
           criticalStudyEndTime: 0,
           highestGoalReached: parsed.highestGoalReached || 0,
           hasSeenIntro: parsed.hasSeenIntro || false,
+          hasUsedFruitSnack: parsed.hasUsedFruitSnack || false,
         };
       } catch {
         return INITIAL_STATE;
@@ -321,6 +324,7 @@ export function useGameState() {
         currentPapers: prev.currentPapers - FRUIT_SNACK_COST,
         fruitSnackActive: true,
         fruitSnackEndTime: Date.now() + 30000,
+        hasUsedFruitSnack: true, // Mark that player has used fruit snack
       }));
       return true;
     }

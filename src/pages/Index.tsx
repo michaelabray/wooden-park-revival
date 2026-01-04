@@ -61,7 +61,7 @@ export default function Index() {
   const [antagonistStartTime, setAntagonistStartTime] = useState<number>(0);
   const [showVictory, setShowVictory] = useState(false);
   const [showShop, setShowShop] = useState(false);
-  const [lastAntagonistTime, setLastAntagonistTime] = useState(Date.now());
+  const [lastAntagonistTime, setLastAntagonistTime] = useState(Date.now() - 60000);
 
   // Goal system state
   const goalCheckState: GoalCheckState = useMemo(() => ({
@@ -72,6 +72,8 @@ export default function Index() {
     totalSplintersEarned: state.totalSplintersEarned,
     unlockedBlueprints: state.unlockedBlueprints,
     hasGraduated: state.totalSplintersEarned > 0,
+    highestGoalReached: state.highestGoalReached,
+    hasUsedFruitSnack: state.hasUsedFruitSnack,
   }), [state]);
 
   const currentGoal = useMemo(() => getCurrentGoal(goalCheckState), [goalCheckState]);
@@ -119,7 +121,7 @@ export default function Index() {
         maxDelay = Math.floor(maxDelay * 1.3);
       }
       
-      if (timeSinceLastAntagonist >= minDelay && Math.random() < 0.1) {
+      if (timeSinceLastAntagonist >= minDelay && Math.random() < 0.2) {
         setAntagonist(Math.random() > 0.5 ? 'soggy' : 'sentinel');
         setAntagonistStartTime(Date.now());
         setLastAntagonistTime(now);
@@ -284,8 +286,8 @@ export default function Index() {
             criticalStudyActive={state.criticalStudyActive}
             criticalStudyEndTime={state.criticalStudyEndTime}
           />
-          {/* Tutorial Hand for Goal 3 */}
-          {currentGoal?.id === 3 && state.currentPapers >= 50 && !state.fruitSnackActive && (
+          {/* Tutorial Hand for Goal 3 - points at Fruit Snack until first use */}
+          {currentGoal?.id === 3 && state.currentPapers >= 50 && !state.hasUsedFruitSnack && (
             <div className="absolute -top-2 left-1/2 -translate-x-1/2 -translate-y-full animate-tutorial-pulse z-30 pointer-events-none">
               <img 
                 src="/wooden-park-revival/assets/ui/tutorial-hand.webp" 
@@ -370,12 +372,14 @@ export default function Index() {
       )}
 
       {antagonist && (
-        <AntagonistOverlay
-          type={antagonist} 
-          onSuccess={handleAntagonistSuccess} 
-          onFailure={handleAntagonistFailure}
-          startTime={antagonistStartTime}
-        />
+        <div className="fixed inset-0 z-[100]">
+          <AntagonistOverlay
+            type={antagonist} 
+            onSuccess={handleAntagonistSuccess} 
+            onFailure={handleAntagonistFailure}
+            startTime={antagonistStartTime}
+          />
+        </div>
       )}
 
       {showDevMenu && (
