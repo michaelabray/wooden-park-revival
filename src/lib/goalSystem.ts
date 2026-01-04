@@ -16,6 +16,8 @@ export interface GoalCheckState {
   totalSplintersEarned: number;
   unlockedBlueprints: string[];
   hasGraduated: boolean;
+  highestGoalReached: number;
+  hasUsedFruitSnack: boolean;
 }
 
 export const GOALS: Goal[] = [
@@ -36,9 +38,9 @@ export const GOALS: Goal[] = [
   {
     id: 3,
     title: "Boost Power",
-    description: "Reach 50 Papers",
+    description: "Reach 50 Papers and use Fruit Snack",
     nextHint: "Earn Degree",
-    isComplete: (state) => state.currentPapers >= 50,
+    isComplete: (state) => state.highestGoalReached >= 3 || (state.currentPapers >= 50 && state.hasUsedFruitSnack),
   },
   {
     id: 4,
@@ -85,7 +87,12 @@ export const GOALS: Goal[] = [
 ];
 
 export function getCurrentGoal(state: GoalCheckState): Goal | null {
+  // Use highestGoalReached to ensure goals never revert
   for (const goal of GOALS) {
+    // If this goal was already completed (id <= highestGoalReached), skip it
+    if (goal.id <= state.highestGoalReached) {
+      continue;
+    }
     if (!goal.isComplete(state)) {
       return goal;
     }
