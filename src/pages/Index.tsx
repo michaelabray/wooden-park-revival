@@ -21,6 +21,7 @@ import { SettingsPanel } from '@/components/game/SettingsPanel';
 import { GoalBanner } from '@/components/game/GoalBanner';
 import { VictoryPathBox } from '@/components/game/VictoryPathBox';
 import { TutorialHand } from '@/components/game/TutorialHand';
+import { FounderIntroModal } from '@/components/game/FounderIntroModal';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 export default function Index() {
@@ -45,11 +46,14 @@ export default function Index() {
     addSplinters,
     wipeSave,
     markVictorySeen,
+    markIntroSeen,
+    updateHighestGoal,
   } = useGameState();
 
   const audio = useAudioManager();
 
   const [showSplash, setShowSplash] = useState(true);
+  const [showIntro, setShowIntro] = useState(false);
   const [showDevMenu, setShowDevMenu] = useState(false);
   const [showTrophyMenu, setShowTrophyMenu] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
@@ -73,6 +77,20 @@ export default function Index() {
   const currentGoal = useMemo(() => getCurrentGoal(goalCheckState), [goalCheckState]);
   const nextGoal = useMemo(() => getNextGoal(goalCheckState), [goalCheckState]);
   const goalProgress = useMemo(() => getGoalProgress(goalCheckState), [goalCheckState]);
+
+  // Update highest goal reached when a goal is completed (never decreases)
+  useEffect(() => {
+    if (currentGoal) {
+      // Current goal is the first incomplete goal, so completed = currentGoal.id - 1
+      const completedGoals = currentGoal.id - 1;
+      if (completedGoals > 0) {
+        updateHighestGoal(completedGoals);
+      }
+    } else {
+      // All goals complete (currentGoal is null)
+      updateHighestGoal(9);
+    }
+  }, [currentGoal, updateHighestGoal]);
 
   // Check for victory condition
   useEffect(() => {
@@ -151,14 +169,30 @@ export default function Index() {
 
   const handleBuyBlueprint = useCallback((blueprintId: string, cost: number) => {
     const success = buyBlueprint(blueprintId, cost);
-    if (success) audio.playSFX('buy');
+    if (success) {
+      audio.playSFX('buy');
+      // Auto-close shop when statue is purchased
+      if (blueprintId === 'statue') {
+        setShowShop(false);
+      }
+    }
     return success;
   }, [buyBlueprint, audio]);
 
   // Stable callback to prevent the splash screen from resetting every second
   const handleSplashComplete = useCallback(() => {
     setShowSplash(false);
-  }, []);
+    // Show intro modal if player hasn't seen it
+    if (!state.hasSeenIntro) {
+      setShowIntro(true);
+    }
+  }, [state.hasSeenIntro]);
+
+  const handleIntroComplete = useCallback(() => {
+    setShowIntro(false);
+    markIntroSeen();
+    audio.initialize();
+  }, [markIntroSeen, audio]);
   
   if (showSplash) {
     return <SplashScreen onComplete={handleSplashComplete} />;
@@ -198,7 +232,7 @@ export default function Index() {
                 <img 
                   src="/wooden-park-revival/assets/ui/cart.webp" 
                   alt="Shop"
-                  className="w-[20vw] md:w-[40%] max-w-[120px] min-w-[60px] object-contain drop-shadow-lg"
+                  className="w-[60%] md:w-[70%] max-w-[180px] min-w-[80px] object-contain drop-shadow-lg"
                 />
               </button>
               {/* Tutorial Hand for Goal 2 */}
@@ -365,6 +399,11 @@ export default function Index() {
 
       {showVictory && (
         <VictoryScreen onClose={() => { setShowVictory(false); markVictorySeen(); }} />
+      )}
+
+      {/* Founder Intro Modal - First time play */}
+      {showIntro && (
+        <FounderIntroModal onComplete={handleIntroComplete} />
       )}
     </div>
   );

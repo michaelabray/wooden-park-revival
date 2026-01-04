@@ -20,6 +20,9 @@ export interface GameState {
   prestigeTier: number;
   criticalStudyActive: boolean;
   criticalStudyEndTime: number;
+  // Persistence for goals/tutorial
+  highestGoalReached: number;
+  hasSeenIntro: boolean;
 }
 
 const INITIAL_STATE: GameState = {
@@ -41,6 +44,8 @@ const INITIAL_STATE: GameState = {
   prestigeTier: 0,
   criticalStudyActive: false,
   criticalStudyEndTime: 0,
+  highestGoalReached: 0,
+  hasSeenIntro: false,
 };
 
 const STORAGE_KEY = 'bk-academy-save';
@@ -64,6 +69,8 @@ export function useGameState() {
           prestigeTier: parsed.prestigeTier || 0,
           criticalStudyActive: false,
           criticalStudyEndTime: 0,
+          highestGoalReached: parsed.highestGoalReached || 0,
+          hasSeenIntro: parsed.hasSeenIntro || false,
         };
       } catch {
         return INITIAL_STATE;
@@ -80,6 +87,19 @@ export function useGameState() {
   const markVictorySeen = () => {
     setState(prev => ({ ...prev, hasSeenVictory: true }));
   };
+
+  // Mark intro as seen
+  const markIntroSeen = useCallback(() => {
+    setState(prev => ({ ...prev, hasSeenIntro: true }));
+  }, []);
+
+  // Update highest goal reached (never decreases)
+  const updateHighestGoal = useCallback((goalId: number) => {
+    setState(prev => ({
+      ...prev,
+      highestGoalReached: Math.max(prev.highestGoalReached, goalId),
+    }));
+  }, []);
 
   // Increment antagonists defeated
   const incrementAntagonistsDefeated = useCallback(() => {
@@ -443,5 +463,7 @@ export function useGameState() {
     addSplinters,
     wipeSave,
     markVictorySeen,
+    markIntroSeen,
+    updateHighestGoal,
   };
 }
